@@ -1,1 +1,30 @@
-<h2>Formulario Base</h2>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>AgroControl - Registro diario</title>
+</head>
+<body>
+
+    <h2>Formulario de Registro - Control de la Finca</h2>
+    <a href="index.html">Cerrar Sesión</a>
+    <hr>
+
+    <form action="../backend/guardar.php" method="POST">
+        <h3>1. Control de Ganado</h3>
+        <label>Pesaje del Animal (Kilos):</label><br>
+        <input type="number" name="peso_ganado"><br><br>
+
+        <h3>2. Control de Insumos</h3>
+        <label>Cantidad de Veneno / Fertilizante usado (Litros):</label><br>
+        <input type="number" name="cantidad_insumo"><br><br>
+
+        <h3>3. Gastos de Maquinaria</h3>
+        <label>Gasto de Gasolina (Galones):</label><br>
+        <input type="number" name="gasolina"><br><br>
+
+        <input type="submit" value="Guardar Datos Diario">
+    </form>
+
+</body>
+</html>
