@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insumos - AgroControl Pro</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/modules.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="modules-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-section">
+                <span class="logo-icon">🌾</span>
+                <h2>AgroControl</h2>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="inputs.html" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Insumos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="livestock.html" class="nav-link">
+                    <span class="nav-icon">🐄</span>
+                    <span class="nav-text">Ganado</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="machinery.html" class="nav-link">
+                    <span class="nav-icon">🚜</span>
+                    <span class="nav-text">Maquinaria</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-logout" id="logoutBtn">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">Cerrar Sesión</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <h1>Gestión de Insumos</h1>
+                <p class="breadcrumb">Dashboard > Insumos</p>
+            </div>
+            <div class="top-bar-right">
+                <div class="user-info">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-avatar">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Content -->
+        <div class="module-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <h2>Registrar Nuevo Insumo</h2>
+                <form class="module-form" id="insumosForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombre" class="form-label">Nombre del Insumo</label>
+                            <input 
+                                type="text" 
+                                id="nombre" 
+                                name="nombre" 
+                                class="form-input" 
+                                placeholder="Ej: Fertilizante NPK"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo" class="form-label">Tipo de Insumo</label>
+                            <select id="tipo" name="tipo" class="form-input" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="fertilizante">Fertilizante</option>
+                                <option value="pesticida">Pesticida</option>
+                                <option value="fungicida">Fungicida</option>
+                                <option value="herbicida">Herbicida</option>
+                                <option value="semilla">Semilla</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cantidad" class="form-label">Cantidad</label>
+                            <input 
+                                type="number" 
+                                id="cantidad" 
+                                name="cantidad" 
+                                class="form-input" 
+                                placeholder="0.00"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="unidad" class="form-label">Unidad de Medida</label>
+                            <select id="unidad" name="unidad" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="kg">Kilogramos (kg)</option>
+                                <option value="lt">Litros (lt)</option>
+                                <option value="u">Unidades (u)</option>
+                                <option value="bolsa">Bolsas</option>
+                                <option value="caneca">Canecas</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="precio" class="form-label">Precio Unitario</label>
+                            <input 
+                                type="number" 
+                                id="precio" 
+                                name="precio" 
+                                class="form-input" 
+                                placeholder="0.00"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fecha" class="form-label">Fecha de Ingreso</label>
+                            <input 
+                                type="date" 
+                                id="fecha" 
+                                name="fecha" 
+                                class="form-input" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="proveedor" class="form-label">Proveedor</label>
+                            <input 
+                                type="text" 
+                                id="proveedor" 
+                                name="proveedor" 
+                                class="form-input" 
+                                placeholder="Nombre del proveedor"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lote" class="form-label">Número de Lote</label>
+                            <input 
+                                type="text" 
+                                id="lote" 
+                                name="lote" 
+                                class="form-input" 
+                                placeholder="Ej: LOTE-2024-001"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            💾 Guardar Insumo
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            🔄 Limpiar Formulario
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Table Section -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>Insumos Registrados</h2>
+                    <div class="table-controls">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="🔍 Buscar insumo..."
+                        >
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="insumosTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Total</th>
+                                <th>Proveedor</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insumosTableBody">
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <p id="recordCount">Total de registros: 0</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../utils/api.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/inputs.js"></script>
+</body>
+</html>

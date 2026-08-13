@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroControl Pro - Sistema de Gestión Agrícola</title>
+    <link rel="stylesheet" href="./frontend/css/main.css">
+    <link rel="stylesheet" href="./frontend/css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-section">
+                    <div class="logo-icon">🌾</div>
+                    <h1>AgroControl Pro</h1>
+                </div>
+                <p class="login-subtitle">Sistema Integral de Gestión Agrícola</p>
+            </div>
+
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="usuario@ejemplo.com"
+                        required
+                    >
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <span class="icon">👁️</span>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <div class="form-remember">
+                    <input 
+                        type="checkbox" 
+                        id="remember" 
+                        name="remember"
+                        class="checkbox-input"
+                    >
+                    <label for="remember" class="checkbox-label">Recuérdame en este dispositivo</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login" id="loginButton">
+                    <span class="btn-text">Iniciar Sesión</span>
+                    <span class="btn-loader" style="display: none;">⏳</span>
+                </button>
+
+                <div class="error-message-general" id="generalError" style="display: none;"></div>
+                <div class="success-message" id="successMessage" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p class="footer-text">
+                    ¿No tienes cuenta? <a href="#" class="footer-link">Solicita acceso</a>
+                </p>
+                <p class="footer-text">
+                    <a href="#" class="footer-link">¿Olvidaste tu contraseña?</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="login-background">
+            <div class="gradient-blur"></div>
+        </div>
+    </div>
+
+    <script src="./frontend/js/auth.js"></script>
+</body>
+</html>

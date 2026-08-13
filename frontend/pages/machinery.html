@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maquinaria - AgroControl Pro</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/modules.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="modules-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-section">
+                <span class="logo-icon">🌾</span>
+                <h2>AgroControl</h2>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="inputs.html" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Insumos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="livestock.html" class="nav-link">
+                    <span class="nav-icon">🐄</span>
+                    <span class="nav-text">Ganado</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="machinery.html" class="nav-link">
+                    <span class="nav-icon">🚜</span>
+                    <span class="nav-text">Maquinaria</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-logout" id="logoutBtn">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">Cerrar Sesión</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <h1>Gestión de Maquinaria</h1>
+                <p class="breadcrumb">Dashboard > Maquinaria</p>
+            </div>
+            <div class="top-bar-right">
+                <div class="user-info">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-avatar">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Content -->
+        <div class="module-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <h2>Registrar Nueva Maquinaria</h2>
+                <form class="module-form" id="machineryForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="codigo_equipo" class="form-label">Código del Equipo</label>
+                            <input 
+                                type="text" 
+                                id="codigo_equipo" 
+                                name="codigo_equipo" 
+                                class="form-input" 
+                                placeholder="Ej: MAQ-001"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre_equipo" class="form-label">Nombre del Equipo</label>
+                            <input 
+                                type="text" 
+                                id="nombre_equipo" 
+                                name="nombre_equipo" 
+                                class="form-input" 
+                                placeholder="Ej: Tractor John Deere"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo_equipo" class="form-label">Tipo de Equipo</label>
+                            <select id="tipo_equipo" name="tipo_equipo" class="form-input" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="tractor">Tractor</option>
+                                <option value="cosechadora">Cosechadora</option>
+                                <option value="arado">Arado</option>
+                                <option value="sembradora">Sembradora</option>
+                                <option value="pulverizador">Pulverizador</option>
+                                <option value="rastrillo">Rastrillo</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="marca" class="form-label">Marca</label>
+                            <input 
+                                type="text" 
+                                id="marca" 
+                                name="marca" 
+                                class="form-input" 
+                                placeholder="Ej: John Deere"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modelo" class="form-label">Modelo</label>
+                            <input 
+                                type="text" 
+                                id="modelo" 
+                                name="modelo" 
+                                class="form-input" 
+                                placeholder="Ej: 5075E"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="anno_fabricacion" class="form-label">Año de Fabricación</label>
+                            <input 
+                                type="number" 
+                                id="anno_fabricacion" 
+                                name="anno_fabricacion" 
+                                class="form-input" 
+                                placeholder="2024"
+                                min="1900"
+                                max="2099"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="serie" class="form-label">Número de Serie</label>
+                            <input 
+                                type="text" 
+                                id="serie" 
+                                name="serie" 
+                                class="form-input" 
+                                placeholder="Número de serie"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estado" class="form-label">Estado del Equipo</label>
+                            <select id="estado" name="estado" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="excelente">Excelente</option>
+                                <option value="bueno">Bueno</option>
+                                <option value="regular">Regular</option>
+                                <option value="mantenimiento">En Mantenimiento</option>
+                                <option value="inoperativo">Inoperativo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="horas_trabajo" class="form-label">Horas de Trabajo</label>
+                            <input 
+                                type="number" 
+                                id="horas_trabajo" 
+                                name="horas_trabajo" 
+                                class="form-input" 
+                                placeholder="0"
+                                min="0"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="valor_adquisicion" class="form-label">Valor de Adquisición ($)</label>
+                            <input 
+                                type="number" 
+                                id="valor_adquisicion" 
+                                name="valor_adquisicion" 
+                                class="form-input" 
+                                placeholder="0.00"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
+                            <input 
+                                type="date" 
+                                id="fecha_adquisicion" 
+                                name="fecha_adquisicion" 
+                                class="form-input" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="proxima_revision" class="form-label">Próxima Revisión</label>
+                            <input 
+                                type="date" 
+                                id="proxima_revision" 
+                                name="proxima_revision" 
+                                class="form-input" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            💾 Guardar Maquinaria
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            🔄 Limpiar Formulario
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Table Section -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>Maquinaria Registrada</h2>
+                    <div class="table-controls">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="🔍 Buscar maquinaria..."
+                        >
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="machineryTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Año</th>
+                                <th>Estado</th>
+                                <th>Horas</th>
+                                <th>Valor ($)</th>
+                                <th>Próx. Revisión</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="machineryTableBody">
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <p id="recordCount">Total de registros: 0</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../utils/api.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/machinery.js"></script>
+</body>
+</html>

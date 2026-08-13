@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AgroControl Pro</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-section">
+                <span class="logo-icon">🌾</span>
+                <h2>AgroControl</h2>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="inputs.html" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Insumos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="livestock.html" class="nav-link">
+                    <span class="nav-icon">🐄</span>
+                    <span class="nav-text">Ganado</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="machinery.html" class="nav-link">
+                    <span class="nav-icon">🚜</span>
+                    <span class="nav-text">Maquinaria</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-logout" id="logoutBtn">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">Cerrar Sesión</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <h1>Dashboard</h1>
+                <p class="breadcrumb">Inicio > Dashboard</p>
+            </div>
+            <div class="top-bar-right">
+                <div class="user-info">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-avatar">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Stats Section -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Insumos Registrados</p>
+                        <h3 class="stat-value" id="insumosCount">0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🐄</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Cabezas de Ganado</p>
+                        <h3 class="stat-value" id="ganadeCount">0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🚜</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Maquinaria</p>
+                        <h3 class="stat-value" id="maquinariaCount">0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Rentabilidad</p>
+                        <h3 class="stat-value">85%</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Section -->
+            <section class="quick-actions">
+                <h2>Acciones Rápidas</h2>
+                <div class="actions-grid">
+                    <a href="inputs.html" class="action-card">
+                        <div class="action-icon">➕</div>
+                        <h3>Registrar Insumo</h3>
+                        <p>Agregar nuevo insumo al inventario</p>
+                    </a>
+                    <a href="livestock.html" class="action-card">
+                        <div class="action-icon">➕</div>
+                        <h3>Registrar Ganado</h3>
+                        <p>Agregar nuevo ejemplar al rebaño</p>
+                    </a>
+                    <a href="machinery.html" class="action-card">
+                        <div class="action-icon">➕</div>
+                        <h3>Registrar Maquinaria</h3>
+                        <p>Agregar nuevo equipo agrícola</p>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Recent Activity Section -->
+            <section class="recent-activity">
+                <h2>Actividad Reciente</h2>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">📝</div>
+                        <div class="activity-info">
+                            <p class="activity-text">Nuevo insumo registrado</p>
+                            <span class="activity-time">Hace 2 horas</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">🐄</div>
+                        <div class="activity-info">
+                            <p class="activity-text">Ganado agregado al sistema</p>
+                            <span class="activity-time">Hace 4 horas</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">🚜</div>
+                        <div class="activity-info">
+                            <p class="activity-text">Maquinaria actualizada</p>
+                            <span class="activity-time">Ayer</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

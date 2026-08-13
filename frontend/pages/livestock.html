@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ganado - AgroControl Pro</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/modules.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="modules-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-section">
+                <span class="logo-icon">🌾</span>
+                <h2>AgroControl</h2>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="inputs.html" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Insumos</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="livestock.html" class="nav-link">
+                    <span class="nav-icon">🐄</span>
+                    <span class="nav-text">Ganado</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="machinery.html" class="nav-link">
+                    <span class="nav-icon">🚜</span>
+                    <span class="nav-text">Maquinaria</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary btn-logout" id="logoutBtn">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">Cerrar Sesión</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <h1>Gestión de Ganado</h1>
+                <p class="breadcrumb">Dashboard > Ganado</p>
+            </div>
+            <div class="top-bar-right">
+                <div class="user-info">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-avatar">👤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Content -->
+        <div class="module-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <h2>Registrar Nuevo Animal</h2>
+                <form class="module-form" id="livestockForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="id_animal" class="form-label">ID del Animal</label>
+                            <input 
+                                type="text" 
+                                id="id_animal" 
+                                name="id_animal" 
+                                class="form-input" 
+                                placeholder="Ej: BOV-001"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre_animal" class="form-label">Nombre del Animal</label>
+                            <input 
+                                type="text" 
+                                id="nombre_animal" 
+                                name="nombre_animal" 
+                                class="form-input" 
+                                placeholder="Ej: Bessie"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo_animal" class="form-label">Tipo de Animal</label>
+                            <select id="tipo_animal" name="tipo_animal" class="form-input" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="bovino">Bovino</option>
+                                <option value="porcino">Porcino</option>
+                                <option value="ovino">Ovino</option>
+                                <option value="caprino">Caprino</option>
+                                <option value="equino">Equino</option>
+                                <option value="ave">Ave</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="raza" class="form-label">Raza</label>
+                            <input 
+                                type="text" 
+                                id="raza" 
+                                name="raza" 
+                                class="form-input" 
+                                placeholder="Ej: Holstein"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sexo" class="form-label">Sexo</label>
+                            <select id="sexo" name="sexo" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="macho">Macho</option>
+                                <option value="hembra">Hembra</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edad" class="form-label">Edad (meses)</label>
+                            <input 
+                                type="number" 
+                                id="edad" 
+                                name="edad" 
+                                class="form-input" 
+                                placeholder="0"
+                                min="0"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="peso" class="form-label">Peso (kg)</label>
+                            <input 
+                                type="number" 
+                                id="peso" 
+                                name="peso" 
+                                class="form-input" 
+                                placeholder="0.00"
+                                step="0.1"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                            <input 
+                                type="date" 
+                                id="fecha_nacimiento" 
+                                name="fecha_nacimiento" 
+                                class="form-input" 
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estado_salud" class="form-label">Estado de Salud</label>
+                            <select id="estado_salud" name="estado_salud" class="form-input" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="excelente">Excelente</option>
+                                <option value="bueno">Bueno</option>
+                                <option value="regular">Regular</option>
+                                <option value="enfermo">Enfermo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="valor_animal" class="form-label">Valor del Animal ($)</label>
+                            <input 
+                                type="number" 
+                                id="valor_animal" 
+                                name="valor_animal" 
+                                class="form-input" 
+                                placeholder="0.00"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            💾 Guardar Animal
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            🔄 Limpiar Formulario
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Table Section -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>Animales Registrados</h2>
+                    <div class="table-controls">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="🔍 Buscar animal..."
+                        >
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="livestockTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Raza</th>
+                                <th>Sexo</th>
+                                <th>Edad (meses)</th>
+                                <th>Peso (kg)</th>
+                                <th>Nacimiento</th>
+                                <th>Salud</th>
+                                <th>Valor ($)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="livestockTableBody">
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <p id="recordCount">Total de registros: 0</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../utils/api.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/livestock.js"></script>
+</body>
+</html>
