@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: agrocontrol_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agrocontrol
+      POSTGRES_PASSWORD: agrocontrol_secret
+      POSTGRES_DB: agrocontrol_pro
+    volumes:
+      - agrocontrol_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agrocontrol -d agrocontrol_pro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agrocontrol_backend
+    restart: unless-stopped
+    environment:
+      # Cambia a postgresql+psycopg2://... para usar Postgres.
+      # Por defecto usa SQLite embebido para arrancar sin configuración.
+      DATABASE_URL: "postgresql+psycopg2://agrocontrol:agrocontrol_secret@db:5432/agrocontrol_pro"
+      JWT_SECRET_KEY: "cambia-esta-clave-en-produccion-agrocontrol-pro"
+      JWT_ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "480"
+      MASTER_USER_NAME: "julian arrieta"
+      MASTER_USER_PASSWORD: "arrieta"
+      MASTER_USER_EMAIL: "julian.arrieta@agrocontrolpro.com"
+      MASTER_USER_PHONE: "3000000000"
+      CORS_ORIGINS: "*"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: agrocontrol_frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  agrocontrol_pg_data:
