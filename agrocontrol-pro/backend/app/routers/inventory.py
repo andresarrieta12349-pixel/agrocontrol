@@ -39,6 +39,20 @@ def crear_bodega(
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
+    # Validación estricta: no se permite crear una bodega sin una finca
+    # activa registrada y seleccionada. Esto respalda en el servidor la
+    # validación que ya hace el frontend en el selector superior.
+    finca = (
+        db.query(models.Finca)
+        .filter(models.Finca.id == payload.finca_id, models.Finca.activo.is_(True))
+        .first()
+    )
+    if not finca:
+        raise HTTPException(
+            status_code=400,
+            detail="Debes registrar y seleccionar una finca activa antes de crear una bodega.",
+        )
+
     bodega = models.Bodega(**payload.model_dump())
     db.add(bodega)
     db.commit()

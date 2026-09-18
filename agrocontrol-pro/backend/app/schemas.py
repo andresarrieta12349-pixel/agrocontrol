@@ -7,7 +7,7 @@ from datetime import datetime, date
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
-from app.models import RolUsuario, TipoMovimiento, EstadoCiclo, SeveridadAlerta
+from app.models import RolUsuario, ProveedorAutenticacion, TipoMovimiento, EstadoCiclo, SeveridadAlerta
 
 
 # ---------------------------------------------------------------------------
@@ -15,15 +15,9 @@ from app.models import RolUsuario, TipoMovimiento, EstadoCiclo, SeveridadAlerta
 # ---------------------------------------------------------------------------
 class LoginRequest(BaseModel):
     identificador: str = Field(
-        ..., description="Correo, teléfono o nombre de usuario", examples=["julian arrieta"]
+        ..., description="Correo, teléfono o nombre de usuario", examples=["operador@agrocontrolpro.com"]
     )
-    password: str = Field(..., examples=["arrieta"])
-
-
-class GoogleLoginRequest(BaseModel):
-    correo: EmailStr = Field(..., description="Correo electrónico de Google")
-    nombre_completo: Optional[str] = Field(None, description="Nombre completo retornado por Google")
-    id_token: Optional[str] = Field(None, description="Token JWT de Google o credencial credential")
+    password: str = Field(..., examples=["••••••••"])
 
 
 class TokenResponse(BaseModel):
@@ -66,6 +60,7 @@ class UsuarioOut(UsuarioBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
     activo: bool
+    proveedor_auth: ProveedorAutenticacion
     creado_en: datetime
 
 
@@ -236,7 +231,9 @@ class BodegaBase(BaseModel):
 
 
 class BodegaCreate(BodegaBase):
-    pass
+    # La finca es obligatoria al crear: no se permite registrar una bodega
+    # "huérfana" sin finca activa asociada (ver routers/inventory.py).
+    finca_id: int
 
 
 class BodegaUpdate(BaseModel):

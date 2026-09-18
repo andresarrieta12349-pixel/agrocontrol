@@ -5,12 +5,10 @@ Módulo de autenticación de AgroControl Pro.
 
 - Hashing de contraseñas con bcrypt (passlib).
 - Emisión y validación de JWT.
-- Bootstrap del usuario maestro de pruebas:
-      identificador: "julian arrieta"  (nombre de usuario / correo / teléfono)
-      password:      "arrieta"
-  Este usuario se crea automáticamente al iniciar la aplicación si no
-  existe, y su contraseña siempre queda almacenada como hash bcrypt
-  (nunca en texto plano) en la base de datos.
+
+No existe ningún usuario "maestro" ni cuenta creada automáticamente:
+todo usuario debe registrarse con correo/contraseña o autenticarse con
+Google (ver app/routers/auth_router.py y app/services/auth_service.py).
 """
 import os
 from datetime import datetime, timedelta
@@ -32,11 +30,6 @@ from app import models
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "clave-de-desarrollo-agrocontrol-pro")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
-
-MASTER_USER_NAME = os.getenv("MASTER_USER_NAME", "julian arrieta")
-MASTER_USER_PASSWORD = os.getenv("MASTER_USER_PASSWORD", "arrieta")
-MASTER_USER_EMAIL = os.getenv("MASTER_USER_EMAIL", "julian.arrieta@agrocontrolpro.com")
-MASTER_USER_PHONE = os.getenv("MASTER_USER_PHONE", "3000000000")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
@@ -96,7 +89,12 @@ def autenticar_usuario(db: Session, identificador: str, password: str) -> Option
     usuario = obtener_usuario_por_identificador(db, identificador)
     if not usuario or not usuario.activo:
         return None
-    if not verify_password(password, usuario.password_hash):
+    # Las cuentas creadas por Google no tienen password_hash: no se les asigna
+    # ninguna contraseña predeterminada, así que el login por contraseña
+    # siempre debe rechazarse para ellas.
+    if not usuario.password_hash:
+        return None
+    if not password or not verify_password(password, usuario.password_hash):
         return None
     return usuario
 
@@ -138,34 +136,3 @@ def requerir_rol(*roles_permitidos: models.RolUsuario):
         return usuario_actual
 
     return dependencia
-
-
-# ---------------------------------------------------------------------------
-# Bootstrap del usuario maestro de pruebas (julian arrieta / arrieta)
-# ---------------------------------------------------------------------------
-def sembrar_usuario_maestro(db: Session) -> None:
-    """
-    Garantiza que el usuario maestro de pruebas exista siempre con
-    credenciales válidas, encriptando la contraseña con bcrypt.
-    Se ejecuta en el evento de arranque de la aplicación (ver main.py).
-    """
-    existente = obtener_usuario_por_identificador(db, MASTER_USER_NAME)
-    if existente:
-        # Asegura que la contraseña maestra siga siendo válida aunque
-        # la BD ya tuviera el registro de una ejecución anterior.
-        if not verify_password(MASTER_USER_PASSWORD, existente.password_hash):
-            existente.password_hash = hash_password(MASTER_USER_PASSWORD)
-            db.commit()
-        return
-
-    usuario_maestro = models.Usuario(
-        nombre_completo="Julian Arrieta",
-        nombre_usuario=MASTER_USER_NAME,
-        correo=MASTER_USER_EMAIL,
-        telefono=MASTER_USER_PHONE,
-        password_hash=hash_password(MASTER_USER_PASSWORD),
-        rol=models.RolUsuario.ADMIN,
-        activo=True,
-    )
-    db.add(usuario_maestro)
-    db.commit()

@@ -27,6 +27,11 @@ class RolUsuario(str, enum.Enum):
     SUPERVISOR = "supervisor"
 
 
+class ProveedorAutenticacion(str, enum.Enum):
+    LOCAL = "local"
+    GOOGLE = "google"
+
+
 class TipoMovimiento(str, enum.Enum):
     ENTRADA = "entrada"
     SALIDA = "salida"
@@ -57,7 +62,14 @@ class Usuario(Base):
     nombre_usuario = Column(String(100), unique=True, index=True, nullable=False)
     correo = Column(String(150), unique=True, index=True, nullable=True)
     telefono = Column(String(30), unique=True, index=True, nullable=True)
-    password_hash = Column(String(255), nullable=False)
+    # Opcional: los usuarios creados mediante Google no tienen contraseña propia
+    # (nunca se les asigna una contraseña por defecto/fija).
+    password_hash = Column(String(255), nullable=True)
+    proveedor_auth = Column(
+        Enum(ProveedorAutenticacion), default=ProveedorAutenticacion.LOCAL, nullable=False
+    )
+    # Identificador único e inmutable que Google asigna a la cuenta (claim "sub").
+    google_sub = Column(String(255), unique=True, index=True, nullable=True)
     rol = Column(Enum(RolUsuario), default=RolUsuario.OPERADOR, nullable=False)
     activo = Column(Boolean, default=True)
     creado_en = Column(DateTime, default=datetime.utcnow)

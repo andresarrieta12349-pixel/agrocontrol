@@ -5,15 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AgroControl Pro | Plataforma de Gestión Agrícola</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script>
-  if (window.location.protocol !== "file:") {
-    const scriptGoogle = document.createElement("script");
-    scriptGoogle.src = "https://accounts.google.com/gsi/client";
-    scriptGoogle.async = true;
-    scriptGoogle.defer = true;
-    document.head.appendChild(scriptGoogle);
-  }
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script>
@@ -50,7 +41,6 @@
           
           <div class="modal-login-header">
             <h2>Iniciar sesión o registrarse</h2>
-            <div class="sub">Obtendrás respuestas más inteligentes, podrás cargar archivos e imágenes, y más.</div>
           </div>
 
           <div class="btn-oauth-group">
@@ -130,14 +120,18 @@
 </div>
 
 <div id="app">
+  <div class="barra-superior-derecha" id="barra-superior-derecha">
+    <button class="btn-config" id="btn-abrir-configuracion" type="button" title="Configuración" aria-haspopup="dialog" onclick="abrirModalConfiguracion()">
+      <svg class="icono-svg" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+
   <aside>
     <div class="brand"><span class="brand-mark">AC</span> AgroControl</div>
     <div class="org-chip"><span class="punto-activo"></span> <span id="org-chip-nombre">Sin finca registrada</span></div>
-
-    <button class="theme-toggle" id="btn-tema" type="button" onclick="toggleTheme()" aria-pressed="false">
-      <svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="4.2"/></svg>
-      <span id="texto-tema">Modo oscuro</span>
-    </button>
 
     <div class="menu-eyebrow">Operación</div>
     <nav class="menu">
@@ -239,10 +233,10 @@
         <div class="tarjeta-tabla">
           <div class="barra-acciones">
             <h3 style="margin:0;">Bodegas</h3>
-            <button class="btn-secundario" onclick="abrirModal('bodega')">+ Nueva bodega</button>
+            <button class="btn-secundario" onclick="intentarAbrirModalBodega()">+ Nueva bodega</button>
           </div>
           <table>
-            <thead><tr><th>Nombre</th><th>Ubicación</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Ubicación</th><th>Finca</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody id="tabla-bodegas"></tbody>
           </table>
         </div>
@@ -277,7 +271,7 @@
           </div>
         </div>
         <table>
-          <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Precio unitario</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tabla-productos"></tbody>
         </table>
       </div>
@@ -407,6 +401,19 @@
         <div><div class="eyebrow">Análisis</div><h1>Reportes descargables</h1></div>
       </div>
 
+      <div class="tarjeta-tabla" style="max-width:460px;">
+        <div class="barra-acciones"><h3 style="margin:0;">Filtrar por finca</h3></div>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+          Acota los tres reportes de abajo a una finca específica antes de descargarlos.
+        </p>
+        <div class="campo">
+          <label>Finca</label>
+          <select id="reporte-finca">
+            <option value="">Todas las fincas</option>
+          </select>
+        </div>
+      </div>
+
       <div class="dos-columnas">
         <div class="tarjeta-tabla">
           <div class="barra-acciones"><h3 style="margin:0;">Inventario actual</h3></div>
@@ -414,8 +421,8 @@
             Stock, valor y estado crítico de todos los productos activos.
           </p>
           <div class="modal-acciones" style="margin-top:16px;">
-            <button class="btn-secundario" onclick="descargarReporte('/api/reportes/inventario/excel', 'inventario.xlsx')">⬇ Excel</button>
-            <button class="btn-secundario" onclick="descargarReporte('/api/reportes/inventario/pdf', 'inventario.pdf')">⬇ PDF</button>
+            <button class="btn-secundario" onclick="descargarReporteInventario('excel')">⬇ Excel</button>
+            <button class="btn-secundario" onclick="descargarReporteInventario('pdf')">⬇ PDF</button>
           </div>
         </div>
 
@@ -452,44 +459,6 @@
   <div class="modal-caja" id="modal-contenido"></div>
 </div>
 
-<div class="modal-google-selector" id="modal-google-selector" style="display:none;">
-  <div class="modal-google-card">
-    <div class="modal-google-header">
-      <svg viewBox="0 0 24 24" width="28" height="28">
-        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.29v3.15C3.26 21.3 7.31 24 12 24z"/>
-        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.29C.47 8.21 0 10.05 0 12s.47 3.79 1.29 5.42l3.99-3.15z"/>
-        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-      </svg>
-      <h3>Elige una cuenta de Google para ingresar a AgroControl Pro</h3>
-    </div>
-    <div class="google-account-list">
-      <button type="button" class="google-account-item" onclick="seleccionarCuentaGoogle('agro.operador@gmail.com', 'Julián Arrieta')">
-        <div class="google-avatar">J</div>
-        <div class="google-info">
-          <div class="google-name">Julián Arrieta</div>
-          <div class="google-email">agro.operador@gmail.com</div>
-        </div>
-      </button>
-      <button type="button" class="google-account-item" onclick="seleccionarCuentaGoogle('admin.finca@empresa.com', 'Administrador Finca')">
-        <div class="google-avatar">A</div>
-        <div class="google-info">
-          <div class="google-name">Administrador Finca</div>
-          <div class="google-email">admin.finca@empresa.com</div>
-        </div>
-      </button>
-      <button type="button" class="google-account-item" onclick="solicitarOtraCuentaGoogle()">
-        <div class="google-avatar" style="background:#5f6368; color:#fff;">+</div>
-        <div class="google-info">
-          <div class="google-name">Usar otra cuenta de Google</div>
-          <div class="google-email">Ingresar correo electrónico...</div>
-        </div>
-      </button>
-    </div>
-    <button type="button" class="btn-cancelar-google" onclick="cerrarSelectorGoogle()">Cancelar</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script src="js/theme.js"></script>
@@ -497,45 +466,49 @@
 <script src="js/views/potreros-view.js"></script>
 <script src="js/components/inventory-table.js"></script>
 <script>
-const API_BASE = (window.AGROCONTROL_API_BASE) || "http://127.0.0.1:8000";
+/* ==========================================================================
+   CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN
+   ========================================================================== */
+const API_BASE = (window.AGROCONTROL_API_BASE) || "http://localhost:8000";
+
 let TOKEN = localStorage.getItem("agrocontrol_token") || null;
 let USUARIO = JSON.parse(localStorage.getItem("agrocontrol_usuario") || "null");
 
+// Instancia del gráfico del dashboard
 let graficoKardex = null;
-let cacheProductos = [], cacheBodegas = [], cacheCiclos = [], cacheFincas = [];
-let cachePotreros = [], cacheAnimales = [], cachePastos = [];
-let cacheLotesActual = [], cacheProveedoresActual = [];
+
+// Caché de datos cargados desde la API (una sola declaración por variable)
+let cacheProductos = [];
+let cacheBodegas = [];
+let cacheCiclos = [];
+let cacheFincas = [];
+let cachePotreros = [];
+let cacheAnimales = [];
+let cachePastos = [];
+let cacheLotesActual = [];
+let cacheProveedoresActual = [];
+
+// Finca activa seleccionada en el selector superior (persistida en el navegador)
+let fincaActivaId = localStorage.getItem("agrocontrol_finca_activa") || "";
+
+// Estado de UI
 let busquedaProductos = "";
 let apiOfflineNotificado = false;
 
+// Exponer cachés que otros scripts (views/components) necesitan leer
+window.cachePastos = cachePastos;
+window.cacheProductos = cacheProductos;
 window.obtenerProducto = (productId) => cacheProductos.find((product) => product.id === productId);
 
+/* ==========================================================================
+   UTILIDADES GENERALES
+   ========================================================================== */
 function notificarDesconexionApiOnce() {
   if (!apiOfflineNotificado) {
     apiOfflineNotificado = true;
-    mostrarToast("Servidor API (http://127.0.0.1:8000) no disponible. Ejecuta uvicorn para habilitar la sincronización.", true);
+    mostrarToast("Servidor API (http://localhost:8000) no disponible. Ejecuta uvicorn para habilitar la sincronización.", true);
   }
 }
-
-if (typeof window.toggleTheme !== "function"){
-  window.toggleTheme = function(){
-    const actual = document.documentElement.getAttribute("data-theme") || "claro";
-    const nuevo = actual === "oscuro" ? "claro" : "oscuro";
-    document.documentElement.setAttribute("data-theme", nuevo);
-    try{ localStorage.setItem("agrocontrol_tema", nuevo); }catch(e){}
-    const btn = document.getElementById("btn-tema");
-    const texto = document.getElementById("texto-tema");
-    if (btn) btn.setAttribute("aria-pressed", String(nuevo === "oscuro"));
-    if (texto) texto.textContent = nuevo === "oscuro" ? "Modo claro" : "Modo oscuro";
-  };
-}
-(function inicializarTextoTema(){
-  const actual = document.documentElement.getAttribute("data-theme") || "claro";
-  const texto = document.getElementById("texto-tema");
-  const btn = document.getElementById("btn-tema");
-  if (texto) texto.textContent = actual === "oscuro" ? "Modo claro" : "Modo oscuro";
-  if (btn) btn.setAttribute("aria-pressed", String(actual === "oscuro"));
-})();
 
 function mostrarToast(mensaje, esError=false){
   const t = document.getElementById("toast");
@@ -568,9 +541,6 @@ async function apiFetch(path, opciones={}){
     throw err;
   }
 }
-window.apiFetch = apiFetch;
-window.mostrarToast = mostrarToast;
-window.notificarDesconexionApiOnce = notificarDesconexionApiOnce;
 
 function formatoMoneda(valor){
   return "$" + Number(valor || 0).toLocaleString("es-CO", {maximumFractionDigits:0});
@@ -596,6 +566,49 @@ function marcarCampo(campo, valido){
   return valido;
 }
 
+function cambiarEstadoCarga(boton, cargando, texto){
+  if (!boton) return;
+  if (cargando){
+    boton.dataset.textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.innerHTML = '<span class="spinner" aria-hidden="true"></span>' + texto;
+  } else {
+    boton.disabled = false;
+    boton.textContent = boton.dataset.textoOriginal || texto;
+  }
+}
+
+// Exponer utilidades usadas por scripts externos (views/components)
+window.apiFetch = apiFetch;
+window.mostrarToast = mostrarToast;
+window.notificarDesconexionApiOnce = notificarDesconexionApiOnce;
+
+/* ==========================================================================
+   TEMA (CLARO / OSCURO)
+   ========================================================================== */
+if (typeof window.toggleTheme !== "function"){
+  window.toggleTheme = function(){
+    const actual = document.documentElement.getAttribute("data-theme") || "claro";
+    const nuevo = actual === "oscuro" ? "claro" : "oscuro";
+    document.documentElement.setAttribute("data-theme", nuevo);
+    try{ localStorage.setItem("agrocontrol_tema", nuevo); }catch(e){}
+    const btn = document.getElementById("btn-tema");
+    const texto = document.getElementById("texto-tema");
+    if (btn) btn.setAttribute("aria-pressed", String(nuevo === "oscuro"));
+    if (texto) texto.textContent = nuevo === "oscuro" ? "Modo claro" : "Modo oscuro";
+  };
+}
+(function inicializarTextoTema(){
+  const actual = document.documentElement.getAttribute("data-theme") || "claro";
+  const texto = document.getElementById("texto-tema");
+  const btn = document.getElementById("btn-tema");
+  if (texto) texto.textContent = actual === "oscuro" ? "Modo claro" : "Modo oscuro";
+  if (btn) btn.setAttribute("aria-pressed", String(actual === "oscuro"));
+})();
+
+/* ==========================================================================
+   AUTENTICACIÓN: VALIDACIÓN DE CAMPOS
+   ========================================================================== */
 function configurarValidacionAutenticacion(){
   const identificador = document.getElementById("identificador");
   const passwordLogin = document.getElementById("password");
@@ -615,21 +628,11 @@ function configurarValidacionAutenticacion(){
   });
   confirmacion.addEventListener("input", () => marcarCampo(confirmacion, confirmacion.value === passwordRegistro.value && confirmacion.value.length > 0));
 }
-
-function cambiarEstadoCarga(boton, cargando, texto){
-  if (!boton) return;
-  if (cargando){
-    boton.dataset.textoOriginal = boton.textContent;
-    boton.disabled = true;
-    boton.innerHTML = '<span class="spinner" aria-hidden="true"></span>' + texto;
-  } else {
-    boton.disabled = false;
-    boton.textContent = boton.dataset.textoOriginal || texto;
-  }
-}
-
 configurarValidacionAutenticacion();
 
+/* ==========================================================================
+   AUTENTICACIÓN: LOGIN CON CORREO/CONTRASEÑA
+   ========================================================================== */
 document.getElementById("form-login").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const identificador = document.getElementById("identificador").value.trim();
@@ -638,20 +641,26 @@ document.getElementById("form-login").addEventListener("submit", async (e)=>{
   const errorBox = document.getElementById("error-login");
   errorBox.style.display = "none";
 
-  // Si el campo de contraseña aún no está visible y es un correo válido, lo mostramos o intentamos ingreso
+  // Si el campo de contraseña aún no está visible, lo mostramos primero
   if (contenedorPassword.style.display === "none" && !passwordInput.value) {
     contenedorPassword.style.display = "block";
     passwordInput.focus();
     return;
   }
 
-  const password = passwordInput.value || "arrieta"; // Contraseña por defecto si se ingresa identificador solo
+  const password = passwordInput.value;
   const boton = e.target.querySelector("button[type=submit]");
   const identificadorValido = identificador.length > 0;
   marcarCampo(document.getElementById("identificador"), identificadorValido);
 
   if (!identificadorValido){
     errorBox.textContent = "Por favor ingresa tu dirección de correo o identificador.";
+    errorBox.style.display = "block";
+    return;
+  }
+  if (!password){
+    marcarCampo(passwordInput, false);
+    errorBox.textContent = "Por favor ingresa tu contraseña.";
     errorBox.style.display = "block";
     return;
   }
@@ -674,80 +683,18 @@ document.getElementById("form-login").addEventListener("submit", async (e)=>{
   }
 });
 
-// Manejo de Inicio de Sesión con Google
-async function iniciarSesionConGoogle(correoGoogle, nombreGoogle) {
-  const errorBox = document.getElementById("error-login");
-  if (errorBox) errorBox.style.display = "none";
-  const correo = (correoGoogle || "agro.operador@gmail.com").trim().toLowerCase();
-  const nombre = nombreGoogle || (correo.split("@")[0].charAt(0).toUpperCase() + correo.split("@")[0].slice(1));
-
-  try {
-    const data = await apiFetch("/api/auth/google", {
-      method: "POST",
-      body: JSON.stringify({
-        correo: correo,
-        nombre_completo: nombre
-      })
-    });
-    TOKEN = data.access_token;
-    USUARIO = data.usuario;
-  } catch (err) {
-    // Si la API falla por desconexión de red o servidor no activo, autentica localmente sin error Failed to fetch
-    TOKEN = "token_google_oauth_" + Date.now();
-    USUARIO = {
-      id: 101,
-      nombre_completo: nombre,
-      nombre_usuario: correo.split("@")[0].replace(".", "_"),
-      correo: correo,
-      rol: "admin",
-      activo: true,
-      creado_en: new Date().toISOString()
-    };
-  }
-
-  localStorage.setItem("agrocontrol_token", TOKEN);
-  localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
-  cerrarSelectorGoogle();
-  iniciarApp();
-  mostrarToast("¡Bienvenido! Sesión iniciada con Google (" + correo + ").");
-}
-
+/* ==========================================================================
+   AUTENTICACIÓN: LOGIN CON GOOGLE (OAuth 2.0 con redirección en el backend)
+   --------------------------------------------------------------------------
+   No hay ningún Client ID ni SDK de Google en el frontend: el navegador
+   simplemente navega al backend, que es quien conoce GOOGLE_CLIENT_ID y
+   GOOGLE_CLIENT_SECRET y quien habla con Google. Google muestra su propio
+   selector de cuentas y, al terminar, redirige de regreso aquí con el
+   token de AgroControl Pro en el fragmento de la URL (después de "#").
+   ========================================================================== */
 document.getElementById("btn-google-login")?.addEventListener("click", () => {
-  if (window.location.protocol !== "file:" && window.google && window.google.accounts && window.google.accounts.id) {
-    try {
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          abrirSelectorGoogle();
-        }
-      });
-      return;
-    } catch(e){}
-  }
-  abrirSelectorGoogle();
+  window.location.href = API_BASE + "/api/auth/google/login";
 });
-
-function abrirSelectorGoogle() {
-  const modal = document.getElementById("modal-google-selector");
-  if (modal) modal.style.display = "flex";
-}
-
-function cerrarSelectorGoogle() {
-  const modal = document.getElementById("modal-google-selector");
-  if (modal) modal.style.display = "none";
-}
-
-function seleccionarCuentaGoogle(correo, nombre) {
-  iniciarSesionConGoogle(correo, nombre);
-}
-
-function solicitarOtraCuentaGoogle() {
-  const correo = prompt("Ingresa tu correo electrónico de Google:", "usuario@gmail.com");
-  if (correo && correo.trim()) {
-    const partes = correo.trim().split("@")[0];
-    const nombreDefecto = partes.charAt(0).toUpperCase() + partes.slice(1);
-    iniciarSesionConGoogle(correo.trim(), nombreDefecto);
-  }
-}
 
 document.getElementById("btn-apple-login")?.addEventListener("click", () => {
   mostrarToast("Autenticación con Apple estará disponible próximamente.");
@@ -761,6 +708,9 @@ document.getElementById("btn-cerrar-modal-login")?.addEventListener("click", () 
   document.getElementById("pantalla-login").style.display = "none";
 });
 
+/* ==========================================================================
+   AUTENTICACIÓN: REGISTRO
+   ========================================================================== */
 const contenedorAutenticacion = document.getElementById("contenedor-autenticacion");
 const errorRegistro = document.getElementById("error-registro");
 const exitoLogin = document.getElementById("exito-login");
@@ -828,6 +778,9 @@ function cerrarSesion(){
 }
 document.getElementById("btn-salir").addEventListener("click", cerrarSesion);
 
+/* ==========================================================================
+   NAVEGACIÓN ENTRE SECCIONES
+   ========================================================================== */
 document.querySelectorAll("nav.menu button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     document.querySelectorAll("nav.menu button").forEach(b=>b.classList.remove("activo"));
@@ -855,9 +808,12 @@ function iniciarApp(){
     weekday:"long", year:"numeric", month:"long", day:"numeric"
   });
   cargarDashboard();
-  apiFetch("/api/admin/fincas").then(fincas => { cacheFincas = fincas; actualizarChipOrganizacion(); }).catch(()=>{});
+  apiFetch("/api/admin/fincas").then(fincas => { cacheFincas = fincas; renderSelectoresFinca(); }).catch(()=>{});
 }
 
+/* ==========================================================================
+   MÓDULO: DASHBOARD
+   ========================================================================== */
 async function cargarDashboard(){
   try{
     const r = await apiFetch("/api/dashboard/resumen");
@@ -932,6 +888,9 @@ async function cargarDashboard(){
   }
 }
 
+/* ==========================================================================
+   UTILIDADES DE TABLAS (BOTONES DE ACCIÓN, EDITAR, BORRAR)
+   ========================================================================== */
 function botonesAccion(tipo, id){
   return `
     <button class="btn-icono" title="Editar" onclick="editarRegistro('${tipo}', ${id})">
@@ -962,9 +921,6 @@ window.borrarRegistro = async (tipo, id) => {
   }catch(err){ mostrarToast(err.message, true); }
 };
 
-let cacheLotesActual = [], cacheProveedoresActual = [], cachePastos = [];
-window.cachePastos = cachePastos;
-
 window.toggleEstadoBodega = async (id, nuevoEstado) => {
   const accion = nuevoEstado ? "habilitar" : "deshabilitar";
   const bodega = (cacheBodegas || []).find(b => b.id === id);
@@ -982,6 +938,9 @@ window.toggleEstadoBodega = async (id, nuevoEstado) => {
   }
 };
 
+/* ==========================================================================
+   MÓDULO: INVENTARIO Y BODEGAS
+   ========================================================================== */
 async function cargarInventario(){
   try{
     const [bodegas, productos] = await Promise.all([
@@ -994,18 +953,25 @@ async function cargarInventario(){
 
     const tablaBodegas = document.getElementById("tabla-bodegas");
     if (tablaBodegas) {
-      tablaBodegas.innerHTML = (cacheBodegas || []).map(b => `
+      tablaBodegas.innerHTML = (cacheBodegas || []).map(b => {
+        const finca = (cacheFincas || []).find(f => f.id === b.finca_id);
+        return `
         <tr>
           <td>${b.nombre}</td>
           <td>${b.ubicacion || "—"}</td>
+          <td>${finca ? finca.nombre : (b.finca_id ? `#${b.finca_id}` : "—")}</td>
           <td><span class="badge ${b.activo ? 'ok' : 'critico'}">${b.activo ? 'Activa' : 'Inactiva'}</span></td>
           <td>
+            <button class="btn-icono" title="Editar" onclick="editarRegistro('bodega', ${b.id})">
+              <svg class="icono-svg" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
             <button class="btn-tabla ${b.activo ? 'danger' : ''}" type="button" onclick="toggleEstadoBodega(${b.id}, ${!b.activo})">
               ${b.activo ? 'Deshabilitar' : 'Habilitar'}
             </button>
           </td>
         </tr>
-      `).join("") || '<tr><td colspan="4" class="vacio">Sin bodegas registradas</td></tr>';
+      `;
+      }).join("") || '<tr><td colspan="5" class="vacio">Sin bodegas registradas</td></tr>';
     }
 
     renderizarProductos();
@@ -1021,6 +987,52 @@ async function cargarInventario(){
 }
 window.cargarInventario = cargarInventario;
 
+function renderizarProductos(){
+  const termino = busquedaProductos.trim().toLowerCase();
+  const productosFiltrados = cacheProductos.filter((producto) => {
+    if (!termino) return true;
+    return [producto.codigo, producto.nombre, producto.categoria]
+      .filter(Boolean)
+      .some((valor) => String(valor).toLowerCase().includes(termino));
+  });
+  document.getElementById("tabla-productos").innerHTML = renderProductRows(productosFiltrados)
+    || '<tr><td colspan="8" class="vacio">No hay productos que coincidan con la búsqueda.</td></tr>';
+}
+window.renderizarProductos = renderizarProductos;
+
+window.eliminarProductoDeTabla = (productId) => {
+  cacheProductos = cacheProductos.filter((item) => item.id !== productId);
+  window.cacheProductos = cacheProductos;
+  renderizarProductos();
+};
+
+document.getElementById("busqueda-productos").addEventListener("input", (e)=>{
+  busquedaProductos = e.target.value;
+  renderizarProductos();
+});
+
+document.getElementById("form-movimiento").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  try{
+    await apiFetch("/api/inventario/movimientos", {
+      method:"POST",
+      body: JSON.stringify({
+        producto_id: Number(document.getElementById("mov-producto").value),
+        bodega_id: Number(document.getElementById("mov-bodega").value),
+        tipo: document.getElementById("mov-tipo").value,
+        cantidad: Number(document.getElementById("mov-cantidad").value),
+        referencia: document.getElementById("mov-referencia").value || null
+      })
+    });
+    mostrarToast("Movimiento registrado correctamente");
+    e.target.reset();
+    cargarInventario();
+  }catch(err){ mostrarToast(err.message, true); }
+});
+
+/* ==========================================================================
+   MÓDULO: POTREROS Y GANADO
+   ========================================================================== */
 async function cargarPotreros(){
   try{
     const [potreros, animales, pastos] = await Promise.all([
@@ -1041,6 +1053,7 @@ async function cargarPotreros(){
     else mostrarToast(err.message, true);
   }
 }
+window.cargarPotreros = cargarPotreros;
 
 function renderPastos(pastos){
   const cuerpo = document.getElementById("tabla-pastos");
@@ -1084,15 +1097,16 @@ window.toggleEstadoPasto = async (id, nuevoEstado) => {
   }
 };
 
-window.cargarPotreros = cargarPotreros;
 window.editarPotrero = (potreroId) => {
   const potrero = cachePotreros.find((item) => item.id === potreroId);
   if (potrero) abrirModal("potrero", potrero);
 };
+
 window.editarAnimal = (animalId) => {
   const animal = cacheAnimales.find((item) => item.id === animalId);
   if (animal) abrirModal("animal", animal);
 };
+
 window.borrarPotrero = async (potreroId) => {
   const potrero = cachePotreros.find((item) => item.id === potreroId);
   if (!potrero || !confirm(`¿Borrar el potrero "${potrero.nombre}"?`)) return;
@@ -1103,6 +1117,7 @@ window.borrarPotrero = async (potreroId) => {
     mostrarToast("Potrero borrado correctamente");
   }catch(err){ mostrarToast(err.message, true); }
 };
+
 window.borrarAnimal = async (animalId) => {
   const animal = cacheAnimales.find((item) => item.id === animalId);
   if (!animal || !confirm(`¿Borrar el animal "${animal.arete}"?`)) return;
@@ -1115,48 +1130,9 @@ window.borrarAnimal = async (animalId) => {
   }catch(err){ mostrarToast(err.message, true); }
 };
 
-function renderizarProductos(){
-  const termino = busquedaProductos.trim().toLowerCase();
-  const productosFiltrados = cacheProductos.filter((producto) => {
-    if (!termino) return true;
-    return [producto.codigo, producto.nombre, producto.categoria]
-      .filter(Boolean)
-      .some((valor) => String(valor).toLowerCase().includes(termino));
-  });
-  document.getElementById("tabla-productos").innerHTML = renderProductRows(productosFiltrados)
-    || '<tr><td colspan="7" class="vacio">No hay productos que coincidan con la búsqueda.</td></tr>';
-}
-window.renderizarProductos = renderizarProductos;
-window.eliminarProductoDeTabla = (productId) => {
-  cacheProductos = cacheProductos.filter((item) => item.id !== productId);
-  window.cacheProductos = cacheProductos;
-  renderizarProductos();
-};
-
-document.getElementById("busqueda-productos").addEventListener("input", (e)=>{
-  busquedaProductos = e.target.value;
-  renderizarProductos();
-});
-
-document.getElementById("form-movimiento").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  try{
-    await apiFetch("/api/inventario/movimientos", {
-      method:"POST",
-      body: JSON.stringify({
-        producto_id: Number(document.getElementById("mov-producto").value),
-        bodega_id: Number(document.getElementById("mov-bodega").value),
-        tipo: document.getElementById("mov-tipo").value,
-        cantidad: Number(document.getElementById("mov-cantidad").value),
-        referencia: document.getElementById("mov-referencia").value || null
-      })
-    });
-    mostrarToast("Movimiento registrado correctamente");
-    e.target.reset();
-    cargarInventario();
-  }catch(err){ mostrarToast(err.message, true); }
-});
-
+/* ==========================================================================
+   MÓDULO: PRODUCCIÓN AGRÍCOLA
+   ========================================================================== */
 async function cargarProduccion(){
   try{
     const ciclos = await apiFetch("/api/produccion/ciclos").catch(() => null);
@@ -1218,6 +1194,9 @@ document.getElementById("form-cosecha").addEventListener("submit", async (e)=>{
   }catch(err){ mostrarToast(err.message, true); }
 });
 
+/* ==========================================================================
+   MÓDULO: ADMINISTRACIÓN (FINCAS, LOTES, PROVEEDORES)
+   ========================================================================== */
 async function cargarAdministracion(){
   try{
     const [fincas, lotes, proveedores] = await Promise.all([
@@ -1253,7 +1232,7 @@ async function cargarAdministracion(){
       `).join("") || '<tr><td colspan="5" class="vacio">Sin proveedores registrados</td></tr>';
     }
 
-    actualizarChipOrganizacion();
+    renderSelectoresFinca();
   }catch(err){
     if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
     else mostrarToast(err.message, true);
@@ -1264,18 +1243,139 @@ window.cargarAdministracion = cargarAdministracion;
 function actualizarChipOrganizacion(){
   const chip = document.getElementById("org-chip-nombre");
   if (!chip) return;
-  chip.textContent = (cacheFincas && cacheFincas.length) ? cacheFincas[0].nombre : "Sin finca registrada";
+  const fincaActiva = (cacheFincas || []).find(f => String(f.id) === String(fincaActivaId));
+  if (fincaActiva) {
+    chip.textContent = fincaActiva.nombre;
+  } else if (cacheFincas && cacheFincas.length) {
+    chip.textContent = "Sin finca activa seleccionada";
+  } else {
+    chip.textContent = "Sin finca registrada";
+  }
 }
 
+/* ==========================================================================
+   FINCA ACTIVA (selector superior + validación estricta para bodegas)
+   ========================================================================== */
+function renderSelectoresFinca(){
+  const fincasActivas = (cacheFincas || []).filter(f => f.activo);
+  // Si la finca activa guardada ya no existe o fue desactivada, se limpia.
+  if (fincaActivaId && !fincasActivas.some(f => String(f.id) === String(fincaActivaId))) {
+    fincaActivaId = "";
+    localStorage.removeItem("agrocontrol_finca_activa");
+  }
+
+  const opciones = '<option value="">Selecciona una finca…</option>' +
+    fincasActivas.map(f => `<option value="${f.id}" ${String(f.id) === String(fincaActivaId) ? "selected" : ""}>${f.nombre}</option>`).join("");
+
+  const selectorConfig = document.getElementById("config-finca-activa");
+  if (selectorConfig) selectorConfig.innerHTML = opciones;
+
+  actualizarChipOrganizacion();
+}
+window.renderSelectoresFinca = renderSelectoresFinca;
+
+function cambiarFincaActiva(valor){
+  fincaActivaId = valor || "";
+  if (fincaActivaId) {
+    localStorage.setItem("agrocontrol_finca_activa", fincaActivaId);
+  } else {
+    localStorage.removeItem("agrocontrol_finca_activa");
+  }
+  renderSelectoresFinca();
+  mostrarToast(fincaActivaId ? "Finca activa actualizada" : "Se quitó la finca activa");
+}
+window.cambiarFincaActiva = cambiarFincaActiva;
+
+function validarFincaActivaOAlertar(){
+  if (!cacheFincas || !cacheFincas.filter(f => f.activo).length) {
+    alert("Debes registrar al menos una finca (módulo Administración) antes de crear una bodega.");
+    return false;
+  }
+  if (!fincaActivaId) {
+    alert("Selecciona primero una finca activa en el selector superior antes de crear una bodega.");
+    return false;
+  }
+  return true;
+}
+window.validarFincaActivaOAlertar = validarFincaActivaOAlertar;
+
+function intentarAbrirModalBodega(){
+  if (!validarFincaActivaOAlertar()) return;
+  abrirModal("bodega");
+}
+window.intentarAbrirModalBodega = intentarAbrirModalBodega;
+
+/* ==========================================================================
+   MODAL DE CONFIGURACIÓN (esquina superior derecha)
+   ========================================================================== */
+function abrirModalConfiguracion(){
+  const cont = document.getElementById("modal-contenido");
+  const temaActual = document.documentElement.getAttribute("data-theme") || "claro";
+  cont.innerHTML = `
+    <h3>Configuración</h3>
+    <div class="config-bloque">
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Modo oscuro</div>
+          <div class="config-fila__sub">Cambia la apariencia de toda la plataforma.</div>
+        </div>
+        <label class="interruptor">
+          <input type="checkbox" id="chk-modo-oscuro" ${temaActual === "oscuro" ? "checked" : ""} onchange="toggleTheme()">
+          <span class="interruptor__riel"></span>
+        </label>
+      </div>
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Finca activa</div>
+          <div class="config-fila__sub">Se usa para validar bodegas nuevas y filtrar reportes.</div>
+        </div>
+        <select id="config-finca-activa" onchange="cambiarFincaActiva(this.value)"></select>
+      </div>
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Sesión</div>
+          <div class="config-fila__sub">${(USUARIO && (USUARIO.nombre_completo || USUARIO.nombre_usuario)) || "—"} · ${(USUARIO && USUARIO.rol) || "—"}</div>
+        </div>
+        <button type="button" class="btn-secundario" onclick="cerrarModal(); cerrarSesion();">Cerrar sesión</button>
+      </div>
+    </div>
+    <div class="modal-acciones">
+      <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById("modal-fondo").classList.add("activo");
+  renderSelectoresFinca();
+}
+window.abrirModalConfiguracion = abrirModalConfiguracion;
+
+/* ==========================================================================
+   MÓDULO: REPORTES
+   ========================================================================== */
 async function cargarReportes(){
   try{
-    const ciclos = await apiFetch("/api/produccion/ciclos").catch(() => null);
+    const [ciclos, fincas] = await Promise.all([
+      apiFetch("/api/produccion/ciclos").catch(() => null),
+      apiFetch("/api/admin/fincas").catch(() => null)
+    ]);
     if (ciclos) cacheCiclos = ciclos;
+    if (fincas) cacheFincas = fincas;
+
     const select = document.getElementById("reporte-cosecha-ciclo");
     if (select) {
       select.innerHTML = '<option value="">Todos los ciclos</option>' +
         (cacheCiclos || []).map(c => `<option value="${c.id}">${c.nombre} — ${c.cultivo}</option>`).join("");
     }
+
+    const selectorFincaReporte = document.getElementById("reporte-finca");
+    if (selectorFincaReporte) {
+      selectorFincaReporte.innerHTML = '<option value="">Todas las fincas</option>' +
+        (cacheFincas || []).filter(f => f.activo).map(f => `<option value="${f.id}">${f.nombre}</option>`).join("");
+      // Por defecto se preselecciona la finca activa, pero el usuario puede
+      // cambiarla libremente sólo para efectos del reporte a descargar.
+      selectorFincaReporte.value = fincaActivaId || "";
+    }
+
+    renderSelectoresFinca();
   }catch(err){
     if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
     else mostrarToast(err.message, true);
@@ -1302,12 +1402,28 @@ async function descargarReporte(ruta, nombreArchivo){
 }
 window.descargarReporte = descargarReporte;
 
+function obtenerFincaSeleccionadaReporte(){
+  const el = document.getElementById("reporte-finca");
+  return el ? el.value : "";
+}
+
+function descargarReporteInventario(formato){
+  const fincaId = obtenerFincaSeleccionadaReporte();
+  const params = new URLSearchParams();
+  if (fincaId) params.set("finca_id", fincaId);
+  const query = params.toString() ? "?" + params.toString() : "";
+  descargarReporte(`/api/reportes/inventario/${formato}${query}`, `inventario.${formato === "excel" ? "xlsx" : "pdf"}`);
+}
+window.descargarReporteInventario = descargarReporteInventario;
+
 function descargarReporteKardex(formato){
   const desde = document.getElementById("reporte-kardex-desde").value;
   const hasta = document.getElementById("reporte-kardex-hasta").value;
+  const fincaId = obtenerFincaSeleccionadaReporte();
   const params = new URLSearchParams();
   if (desde) params.set("desde", desde);
   if (hasta) params.set("hasta", hasta);
+  if (fincaId) params.set("finca_id", fincaId);
   const query = params.toString() ? "?" + params.toString() : "";
   descargarReporte(`/api/reportes/kardex/${formato}${query}`, `kardex.${formato === "excel" ? "xlsx" : "pdf"}`);
 }
@@ -1315,17 +1431,27 @@ window.descargarReporteKardex = descargarReporteKardex;
 
 function descargarReporteCosechas(formato){
   const cicloId = document.getElementById("reporte-cosecha-ciclo").value;
-  const query = cicloId ? `?ciclo_id=${cicloId}` : "";
+  const fincaId = obtenerFincaSeleccionadaReporte();
+  const params = new URLSearchParams();
+  if (cicloId) params.set("ciclo_id", cicloId);
+  if (fincaId) params.set("finca_id", fincaId);
+  const query = params.toString() ? "?" + params.toString() : "";
   descargarReporte(`/api/reportes/cosechas/${formato}${query}`, `cosechas.${formato === "excel" ? "xlsx" : "pdf"}`);
 }
 window.descargarReporteCosechas = descargarReporteCosechas;
 
+/* ==========================================================================
+   MODALES GENÉRICOS (CREAR / EDITAR REGISTROS)
+   ========================================================================== */
 const formulariosModal = {
   bodega: {
     titulo:"Nueva bodega", endpoint:"/api/inventario/bodegas", recargar: cargarInventario,
-    camposEdicion:["nombre", "ubicacion"],
+    camposEdicion:["nombre", "ubicacion", "finca_id"],
     campos:[{id:"nombre", label:"Nombre", tipo:"text", requerido:true},
-            {id:"ubicacion", label:"Ubicación", tipo:"text"}]
+            {id:"ubicacion", label:"Ubicación", tipo:"text"},
+            {id:"finca_id", label:"Finca", tipo:"select", requerido:true,
+              obtenerOpciones: () => (cacheFincas || []).filter(f => f.activo).map(f => ({ valor: f.id, etiqueta: f.nombre })),
+              obtenerValorInicial: () => fincaActivaId || ''}]
   },
   producto: {
     titulo:"Nuevo producto", endpoint:"/api/inventario/productos", recargar: cargarInventario,
@@ -1404,7 +1530,8 @@ function abrirModal(tipo, registro=null){
     <form id="form-modal" autocomplete="off">
       ${conf.campos.map(c => {
         const noEditableAlEditar = registro && conf.camposEdicion && !conf.camposEdicion.includes(c.id) && c.id !== "codigo";
-        const valorActual = registro?.[c.id] ?? c.valor ?? '';
+        const valorPorDefecto = c.obtenerValorInicial ? c.obtenerValorInicial() : c.valor;
+        const valorActual = registro?.[c.id] ?? valorPorDefecto ?? '';
 
         if (c.tipo === "select") {
           const opciones = c.obtenerOpciones ? c.obtenerOpciones() : (c.opciones || []);
@@ -1483,7 +1610,61 @@ function cerrarModal(){
   document.getElementById("modal-fondo").classList.remove("activo");
 }
 
-if (TOKEN && USUARIO) iniciarApp();
+/* ==========================================================================
+   ARRANQUE: procesa el regreso de Google (si aplica) y luego decide si
+   entra directo a la app con una sesión ya guardada.
+   ========================================================================== */
+async function procesarRegresoDeGoogle() {
+  const fragmento = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const tokenRecibido = fragmento.get("access_token");
+  if (!tokenRecibido) return false;
+
+  // Limpiamos el token de la URL de inmediato (no debe quedar en el
+  // historial del navegador).
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+
+  TOKEN = tokenRecibido;
+  try {
+    const usuario = await apiFetch("/api/auth/me");
+    USUARIO = usuario;
+    localStorage.setItem("agrocontrol_token", TOKEN);
+    localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
+    mostrarToast("Bienvenido, " + (USUARIO.nombre_completo || USUARIO.correo));
+    return true;
+  } catch (err) {
+    TOKEN = null;
+    localStorage.removeItem("agrocontrol_token");
+    localStorage.removeItem("agrocontrol_usuario");
+    const errorBox = document.getElementById("error-login");
+    if (errorBox) {
+      errorBox.textContent = "No se pudo completar el inicio de sesión con Google.";
+      errorBox.style.display = "block";
+    }
+    return false;
+  }
+}
+
+function mostrarErrorDeGoogleSiExiste() {
+  const params = new URLSearchParams(window.location.search);
+  const mensajeError = params.get("auth_error");
+  if (!mensajeError) return;
+  history.replaceState(null, "", window.location.pathname);
+  const errorBox = document.getElementById("error-login");
+  if (errorBox) {
+    errorBox.textContent = decodeURIComponent(mensajeError);
+    errorBox.style.display = "block";
+  }
+}
+
+(async function arrancarSesion() {
+  const autenticadoPorGoogle = await procesarRegresoDeGoogle();
+  if (autenticadoPorGoogle) {
+    iniciarApp();
+    return;
+  }
+  mostrarErrorDeGoogleSiExiste();
+  if (TOKEN && USUARIO) iniciarApp();
+})();
 </script>
 </body>
 </html>

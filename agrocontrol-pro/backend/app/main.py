@@ -4,7 +4,6 @@ main.py
 Punto de entrada de la API de AgroControl Pro (FastAPI).
 
 - Crea las tablas en la base de datos (para entornos donde no se use Alembic).
-- Siembra el usuario maestro de pruebas (julian arrieta / arrieta).
 - Registra todos los routers de los módulos del sistema.
 - Habilita CORS para que el frontend (servido por Nginx en otro puerto)
   pueda consumir la API.
@@ -14,8 +13,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import Base, engine, SessionLocal
-from app.auth import sembrar_usuario_maestro
+from app.database import Base, engine
 from app.routers import auth_router, dashboard, inventory, production, admin, reports
 
 app = FastAPI(
@@ -53,12 +51,6 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-
-    db = SessionLocal()
-    try:
-        sembrar_usuario_maestro(db)
-    finally:
-        db.close()
 
 
 @app.get("/api/health", tags=["Sistema"], summary="Estado del servicio")
