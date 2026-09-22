@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.routers import auth_router, dashboard, inventory, production, admin, reports
+from app.routers import auth_router, dashboard, inventory, production, admin, reports, gastos
 
 app = FastAPI(
     title="AgroControl Pro API",
@@ -67,3 +67,4 @@ app.include_router(inventory.router)
 app.include_router(production.router)
 app.include_router(admin.router)
 app.include_router(reports.router)
+app.include_router(gastos.router)

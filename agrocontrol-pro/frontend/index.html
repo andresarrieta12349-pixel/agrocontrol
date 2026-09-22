@@ -6,8 +6,9 @@
 <title>AgroControl Pro | Plataforma de Gestión Agrícola</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script>
+  // Aplica el tema guardado antes de pintar la página (evita parpadeo)
   (function(){
     try{
       const t = localStorage.getItem("agrocontrol_tema") || "claro";
@@ -19,10 +20,18 @@
 </head>
 <body>
 
+<!-- ==========================================================================
+     1. PANTALLA DE LOGIN
+     ========================================================================== -->
 <div id="pantalla-login">
+
+  <!-- Panel izquierdo (marca) -->
   <div class="login-lateral">
     <div class="malla"></div>
-    <div class="brand"><span class="brand-mark">AC</span> AgroControl Pro <span class="badge-enterprise">Enterprise</span></div>
+    <div class="brand">
+      <span class="brand-mark">AC</span> AgroControl Pro
+      <span class="badge-enterprise">Trazabilidad total</span>
+    </div>
     <div>
       <h1>Gestión agrícola integral para operaciones exigentes.</h1>
       <p>Inventario, producción y administración de fincas en una sola plataforma B2B, con trazabilidad completa por ciclo, lote y bodega.</p>
@@ -33,12 +42,16 @@
       <div class="kpi-chip"><div class="num">24/7</div><div class="lab">Monitoreo</div></div>
     </div>
   </div>
+
+  <!-- Panel derecho (autenticación) -->
   <div class="login-formulario" id="contenedor-autenticacion">
     <div class="caja-form">
+
+      <!-- Inicio de sesión: solo Google + enlace a registro -->
       <div class="formulario-login">
         <div class="modal-login-dark">
           <button type="button" class="btn-close-modal" id="btn-cerrar-modal-login" title="Cerrar">&times;</button>
-          
+
           <div class="modal-login-header">
             <h2>Iniciar sesión o registrarse</h2>
           </div>
@@ -53,40 +66,14 @@
               </svg>
               Continuar con Google
             </button>
-
-            <button type="button" class="btn-oauth-dark" id="btn-apple-login">
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.1c.67-.82 1.13-1.97.99-3.1-.98.04-2.18.66-2.88 1.47-.62.72-1.16 1.88-1.01 3 .09 0 2.23.08 2.9-1.37z"/>
-              </svg>
-              Continuar con Apple
-            </button>
-
-            <button type="button" class="btn-oauth-dark" id="btn-phone-login">
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-              </svg>
-              Continuar con el teléfono
-            </button>
           </div>
 
-          <div class="separador-o"><span>o</span></div>
-
-          <form id="form-login" class="form-login-dark">
-            <div class="campo">
-              <input id="identificador" class="campo-input-dark" type="text" placeholder="Dirección de correo electrónico" required />
-            </div>
-            <div class="campo" id="contenedor-password-login" style="display:none;">
-              <input id="password" class="campo-input-dark" type="password" placeholder="Contraseña (mínimo 8 caracteres)" minlength="8" />
-            </div>
-            <button type="submit" class="btn-continuar-blanco">Continuar</button>
-          </form>
-
           <div class="error-login" id="error-login"></div>
-          <div class="exito-login" id="exito-login"></div>
-          <button type="button" class="enlace-registro" id="mostrar-registro">¿No tienes cuenta? Registrate</button>
+          <button type="button" class="enlace-registro" id="mostrar-registro">¿No tienes cuenta? Regístrate</button>
         </div>
       </div>
 
+      <!-- Registro con correo y contraseña -->
       <div class="formulario-registro">
         <div class="modal-login-dark">
           <div class="modal-login-header">
@@ -115,11 +102,17 @@
           <button type="button" class="enlace-registro" id="mostrar-login">Ya tengo una cuenta</button>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
+<!-- ==========================================================================
+     2. APLICACIÓN PRINCIPAL
+     ========================================================================== -->
 <div id="app">
+
+  <!-- Botón de configuración (esquina superior derecha) -->
   <div class="barra-superior-derecha" id="barra-superior-derecha">
     <button class="btn-config" id="btn-abrir-configuracion" type="button" title="Configuración" aria-haspopup="dialog" onclick="abrirModalConfiguracion()">
       <svg class="icono-svg" viewBox="0 0 24 24">
@@ -129,6 +122,7 @@
     </button>
   </div>
 
+  <!-- Menú lateral -->
   <aside>
     <div class="brand"><span class="brand-mark">AC</span> AgroControl</div>
     <div class="org-chip"><span class="punto-activo"></span> <span id="org-chip-nombre">Sin finca registrada</span></div>
@@ -165,6 +159,14 @@
       </button>
     </nav>
 
+    <div class="menu-eyebrow">Ayuda</div>
+    <nav class="menu">
+      <button data-seccion="manual">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h7"/></svg>
+        Manual de usuario <span class="dot"></span>
+      </button>
+    </nav>
+
     <div class="usuario-box">
       <div class="avatar-usuario" id="avatar-usuario">JA</div>
       <div class="datos">
@@ -178,6 +180,8 @@
   </aside>
 
   <main>
+
+    <!-- ===================== DASHBOARD ===================== -->
     <section class="seccion activa" id="seccion-dashboard">
       <div class="topbar">
         <div>
@@ -210,20 +214,78 @@
         </div>
       </div>
 
-      <div class="fila-paneles">
-        <div class="panel">
-          <h3>Entradas / Salidas de inventario (últimas semanas)</h3>
-          <div class="grafico-contenedor">
-            <canvas id="grafico-kardex"></canvas>
+      <div class="dash-grid">
+        <div class="panel panel-gastos" id="panel-gastos">
+          <div class="panel-cabecera">
+            <div>
+              <h3>Gastos por categoría</h3>
+              <p class="panel-sub">Cómo se reparte el gasto de la operación</p>
+            </div>
+            <div class="panel-acciones">
+              <span class="pill-ejemplo" id="gastos-ejemplo" hidden>Datos de ejemplo</span>
+              <select class="select-compacto" id="gastos-periodo" aria-label="Período de los gastos">
+                <option value="mes">Este mes</option>
+                <option value="trimestre">Últimos 90 días</option>
+                <option value="anio">Este año</option>
+                <option value="todo">Todo el historial</option>
+              </select>
+            </div>
+          </div>
+          <div class="gastos-marco">
+            <div class="gastos-cuerpo" id="gastos-cuerpo">
+              <div class="vacio">Cargando gastos…</div>
+            </div>
           </div>
         </div>
-        <div class="panel">
-          <h3>Alertas recientes</h3>
-          <div id="lista-alertas"><div class="vacio">Sin alertas registradas.</div></div>
+
+        <div class="dash-columna">
+          <div class="panel panel-kardex">
+            <div class="panel-cabecera">
+              <div>
+                <h3>Entradas y salidas de inventario</h3>
+                <p class="panel-sub">Movimientos de las últimas semanas</p>
+              </div>
+            </div>
+            <div class="grafico-contenedor" id="kardex-contenedor">
+              <canvas id="grafico-kardex"></canvas>
+            </div>
+            <div class="vacio" id="kardex-vacio" hidden></div>
+          </div>
+
+          <div class="panel panel-alertas">
+            <div class="panel-cabecera">
+              <div>
+                <h3>Alertas recientes</h3>
+                <p class="panel-sub">Lo que requiere tu atención</p>
+              </div>
+            </div>
+            <div id="lista-alertas"><div class="vacio">Sin alertas registradas.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-gastos-lista">
+        <div class="panel-cabecera">
+          <div>
+            <h3>Gastos registrados</h3>
+            <p class="panel-sub">Los últimos gastos del período seleccionado</p>
+          </div>
+          <button class="btn-secundario" onclick="abrirModal('gasto')">+ Registrar gasto</button>
+        </div>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th class="col-monto">Monto</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-gastos-cuerpo">
+              <tr><td colspan="5" class="vacio">Cargando gastos…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
 
+    <!-- ===================== INVENTARIO Y BODEGAS ===================== -->
     <section class="seccion" id="seccion-inventario">
       <div class="topbar">
         <div><div class="eyebrow">Módulo</div><h1>Inventario y Bodegas</h1></div>
@@ -277,6 +339,7 @@
       </div>
     </section>
 
+    <!-- ===================== POTREROS Y GANADO ===================== -->
     <section class="seccion" id="seccion-potreros">
       <div class="topbar">
         <div><div class="eyebrow">Módulo</div><h1>Potreros y Ganado</h1></div>
@@ -310,6 +373,7 @@
       </div>
     </section>
 
+    <!-- ===================== PRODUCCIÓN AGRÍCOLA ===================== -->
     <section class="seccion" id="seccion-produccion">
       <div class="topbar">
         <div><div class="eyebrow">Módulo</div><h1>Producción Agrícola</h1></div>
@@ -356,6 +420,7 @@
       </div>
     </section>
 
+    <!-- ===================== ADMINISTRACIÓN ===================== -->
     <section class="seccion" id="seccion-administracion">
       <div class="topbar">
         <div><div class="eyebrow">Módulo</div><h1>Administración</h1></div>
@@ -396,6 +461,7 @@
       </div>
     </section>
 
+    <!-- ===================== REPORTES ===================== -->
     <section class="seccion" id="seccion-reportes">
       <div class="topbar">
         <div><div class="eyebrow">Análisis</div><h1>Reportes descargables</h1></div>
@@ -452,22 +518,66 @@
         </div>
       </div>
     </section>
+
+    <!-- ===================== MANUAL DE USUARIO (NUEVO) ===================== -->
+    <section class="seccion" id="seccion-manual">
+      <div class="topbar">
+        <div><div class="eyebrow">Ayuda</div><h1>Manual de usuario</h1></div>
+        <a class="btn-secundario" href="manual.html" target="_blank" rel="noopener" style="text-decoration:none;">
+          Abrir en pestaña nueva ↗
+        </a>
+      </div>
+
+      <div class="tarjeta-tabla" style="padding:0; overflow:hidden;">
+        <iframe id="iframe-manual" title="Manual de usuario AgroControl Pro"
+                style="width:100%; height:calc(100vh - 210px); min-height:520px; border:0; display:block;"></iframe>
+      </div>
+    </section>
+
   </main>
 </div>
 
+<!-- ==========================================================================
+     3. MODAL GENÉRICO Y NOTIFICACIONES
+     ========================================================================== -->
 <div class="modal-fondo" id="modal-fondo">
   <div class="modal-caja" id="modal-contenido"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- ==========================================================================
+     4. SCRIPTS EXTERNOS (vistas y componentes)
+     ========================================================================== -->
 <script src="js/theme.js"></script>
 <script src="js/views/inventory-view.js"></script>
 <script src="js/views/potreros-view.js"></script>
 <script src="js/components/inventory-table.js"></script>
+
+<!-- ==========================================================================
+     5. SCRIPT PRINCIPAL
+     Índice:
+       A. Configuración global y estado
+       B. Utilidades generales
+       C. Tema claro / oscuro
+       D. Autenticación (Google + registro + cerrar sesión)
+       E. Navegación e inicio de la app
+       F. Dashboard
+       G. Tablas: botones de acción, editar, borrar
+       H. Inventario y bodegas
+       I. Potreros y ganado
+       J. Producción agrícola
+       K. Administración
+       L. Finca activa
+       M. Modal de configuración
+       N. Reportes
+       Ñ. Manual de usuario
+       O. Modales genéricos (crear / editar)
+       P. Arranque
+     ========================================================================== -->
 <script>
 /* ==========================================================================
-   CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN
+   A. CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN
    ========================================================================== */
 const API_BASE = (window.AGROCONTROL_API_BASE) || "http://localhost:8000";
 
@@ -488,7 +598,7 @@ let cachePastos = [];
 let cacheLotesActual = [];
 let cacheProveedoresActual = [];
 
-// Finca activa seleccionada en el selector superior (persistida en el navegador)
+// Finca activa seleccionada (persistida en el navegador)
 let fincaActivaId = localStorage.getItem("agrocontrol_finca_activa") || "";
 
 // Estado de UI
@@ -501,7 +611,7 @@ window.cacheProductos = cacheProductos;
 window.obtenerProducto = (productId) => cacheProductos.find((product) => product.id === productId);
 
 /* ==========================================================================
-   UTILIDADES GENERALES
+   B. UTILIDADES GENERALES
    ========================================================================== */
 function notificarDesconexionApiOnce() {
   if (!apiOfflineNotificado) {
@@ -578,13 +688,17 @@ function cambiarEstadoCarga(boton, cargando, texto){
   }
 }
 
+function escaparHtml(texto){
+  return String(texto ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c]));
+}
+
 // Exponer utilidades usadas por scripts externos (views/components)
 window.apiFetch = apiFetch;
 window.mostrarToast = mostrarToast;
 window.notificarDesconexionApiOnce = notificarDesconexionApiOnce;
 
 /* ==========================================================================
-   TEMA (CLARO / OSCURO)
+   C. TEMA (CLARO / OSCURO)
    ========================================================================== */
 if (typeof window.toggleTheme !== "function"){
   window.toggleTheme = function(){
@@ -607,20 +721,15 @@ if (typeof window.toggleTheme !== "function"){
 })();
 
 /* ==========================================================================
-   AUTENTICACIÓN: VALIDACIÓN DE CAMPOS
+   D. AUTENTICACIÓN
    ========================================================================== */
+
+/* --- D1. Validación de campos del registro --- */
 function configurarValidacionAutenticacion(){
-  const identificador = document.getElementById("identificador");
-  const passwordLogin = document.getElementById("password");
   const correoRegistro = document.getElementById("registro-correo");
   const passwordRegistro = document.getElementById("registro-password");
   const confirmacion = document.getElementById("registro-confirmacion");
 
-  identificador.addEventListener("input", () => {
-    const valor = identificador.value.trim();
-    marcarCampo(identificador, valor.length > 0 && (!valor.includes("@") || esCorreoValido(valor)));
-  });
-  passwordLogin.addEventListener("input", () => marcarCampo(passwordLogin, passwordLogin.value.length >= 8));
   correoRegistro.addEventListener("input", () => marcarCampo(correoRegistro, esCorreoValido(correoRegistro.value)));
   passwordRegistro.addEventListener("input", () => {
     marcarCampo(passwordRegistro, esPasswordSegura(passwordRegistro.value));
@@ -630,90 +739,22 @@ function configurarValidacionAutenticacion(){
 }
 configurarValidacionAutenticacion();
 
-/* ==========================================================================
-   AUTENTICACIÓN: LOGIN CON CORREO/CONTRASEÑA
-   ========================================================================== */
-document.getElementById("form-login").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const identificador = document.getElementById("identificador").value.trim();
-  const passwordInput = document.getElementById("password");
-  const contenedorPassword = document.getElementById("contenedor-password-login");
-  const errorBox = document.getElementById("error-login");
-  errorBox.style.display = "none";
-
-  // Si el campo de contraseña aún no está visible, lo mostramos primero
-  if (contenedorPassword.style.display === "none" && !passwordInput.value) {
-    contenedorPassword.style.display = "block";
-    passwordInput.focus();
-    return;
-  }
-
-  const password = passwordInput.value;
-  const boton = e.target.querySelector("button[type=submit]");
-  const identificadorValido = identificador.length > 0;
-  marcarCampo(document.getElementById("identificador"), identificadorValido);
-
-  if (!identificadorValido){
-    errorBox.textContent = "Por favor ingresa tu dirección de correo o identificador.";
-    errorBox.style.display = "block";
-    return;
-  }
-  if (!password){
-    marcarCampo(passwordInput, false);
-    errorBox.textContent = "Por favor ingresa tu contraseña.";
-    errorBox.style.display = "block";
-    return;
-  }
-  cambiarEstadoCarga(boton, true, "Ingresando...");
-  try{
-    const data = await apiFetch("/api/auth/login", {
-      method:"POST",
-      body: JSON.stringify({identificador, password})
-    });
-    TOKEN = data.access_token;
-    USUARIO = data.usuario;
-    localStorage.setItem("agrocontrol_token", TOKEN);
-    localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
-    iniciarApp();
-  }catch(err){
-    errorBox.textContent = "Identificador o contraseña incorrectos.";
-    errorBox.style.display = "block";
-  }finally{
-    cambiarEstadoCarga(boton, false, "Continuar");
-  }
-});
-
-/* ==========================================================================
-   AUTENTICACIÓN: LOGIN CON GOOGLE (OAuth 2.0 con redirección en el backend)
-   --------------------------------------------------------------------------
-   No hay ningún Client ID ni SDK de Google en el frontend: el navegador
-   simplemente navega al backend, que es quien conoce GOOGLE_CLIENT_ID y
-   GOOGLE_CLIENT_SECRET y quien habla con Google. Google muestra su propio
-   selector de cuentas y, al terminar, redirige de regreso aquí con el
-   token de AgroControl Pro en el fragmento de la URL (después de "#").
-   ========================================================================== */
+/* --- D2. Login con Google (OAuth 2.0 con redirección en el backend) ---
+   No hay Client ID ni SDK de Google en el frontend: el navegador navega al
+   backend, que conoce GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET y habla con
+   Google. Al terminar, Google redirige de regreso aquí con el token de
+   AgroControl Pro en el fragmento de la URL (después de "#"). */
 document.getElementById("btn-google-login")?.addEventListener("click", () => {
   window.location.href = API_BASE + "/api/auth/google/login";
-});
-
-document.getElementById("btn-apple-login")?.addEventListener("click", () => {
-  mostrarToast("Autenticación con Apple estará disponible próximamente.");
-});
-
-document.getElementById("btn-phone-login")?.addEventListener("click", () => {
-  mostrarToast("Autenticación por teléfono estará disponible próximamente.");
 });
 
 document.getElementById("btn-cerrar-modal-login")?.addEventListener("click", () => {
   document.getElementById("pantalla-login").style.display = "none";
 });
 
-/* ==========================================================================
-   AUTENTICACIÓN: REGISTRO
-   ========================================================================== */
+/* --- D3. Registro con correo y contraseña --- */
 const contenedorAutenticacion = document.getElementById("contenedor-autenticacion");
 const errorRegistro = document.getElementById("error-registro");
-const exitoLogin = document.getElementById("exito-login");
 
 document.getElementById("mostrar-registro").addEventListener("click", ()=>{
   contenedorAutenticacion.classList.add("registro-activo");
@@ -756,11 +797,20 @@ document.getElementById("form-registro").addEventListener("submit", async (e)=>{
         password
       })
     });
+
+    // Entra directo con la cuenta recién creada
+    const data = await apiFetch("/api/auth/login", {
+      method:"POST",
+      body: JSON.stringify({identificador: correo, password})
+    });
+    TOKEN = data.access_token;
+    USUARIO = data.usuario;
+    localStorage.setItem("agrocontrol_token", TOKEN);
+    localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
+
     document.getElementById("form-registro").reset();
-    document.getElementById("identificador").value = correo;
     contenedorAutenticacion.classList.remove("registro-activo");
-    exitoLogin.textContent = "Cuenta creada. Ya puedes iniciar sesión con tu correo y contraseña.";
-    exitoLogin.style.display = "block";
+    iniciarApp();
   }catch(err){
     errorRegistro.textContent = err.message || "No se pudo crear la cuenta.";
     errorRegistro.style.display = "block";
@@ -769,6 +819,7 @@ document.getElementById("form-registro").addEventListener("submit", async (e)=>{
   }
 });
 
+/* --- D4. Cerrar sesión --- */
 function cerrarSesion(){
   TOKEN = null; USUARIO = null;
   localStorage.removeItem("agrocontrol_token");
@@ -779,7 +830,7 @@ function cerrarSesion(){
 document.getElementById("btn-salir").addEventListener("click", cerrarSesion);
 
 /* ==========================================================================
-   NAVEGACIÓN ENTRE SECCIONES
+   E. NAVEGACIÓN ENTRE SECCIONES E INICIO DE LA APP
    ========================================================================== */
 document.querySelectorAll("nav.menu button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -787,13 +838,15 @@ document.querySelectorAll("nav.menu button").forEach(btn=>{
     btn.classList.add("activo");
     const seccion = btn.dataset.seccion;
     document.querySelectorAll(".seccion").forEach(s=>s.classList.remove("activa"));
-    document.getElementById("seccion-" + seccion).classList.add("activa");
+    const destino = document.getElementById("seccion-" + seccion);
+    if (destino) destino.classList.add("activa");
     if (seccion === "dashboard") cargarDashboard();
     if (seccion === "inventario") cargarInventario();
     if (seccion === "potreros") cargarPotreros();
     if (seccion === "produccion") cargarProduccion();
     if (seccion === "administracion") cargarAdministracion();
     if (seccion === "reportes") cargarReportes();
+    if (seccion === "manual") cargarManual();
   });
 });
 
@@ -812,84 +865,452 @@ function iniciarApp(){
 }
 
 /* ==========================================================================
-   MÓDULO: DASHBOARD
+   F. MÓDULO: DASHBOARD
    ========================================================================== */
-async function cargarDashboard(){
-  try{
-    const r = await apiFetch("/api/dashboard/resumen");
-    if (r) {
-      const elCiclos = document.getElementById("kpi-ciclos-activos");
-      if (elCiclos) elCiclos.textContent = r.ciclos_activos ?? 0;
-      const elAlertas = document.getElementById("kpi-alertas-criticas");
-      if (elAlertas) elAlertas.textContent = r.alertas_criticas ?? 0;
-      const elStock = document.getElementById("kpi-stock-critico");
-      if (elStock) elStock.textContent = r.productos_stock_critico ?? 0;
-      const elValor = document.getElementById("kpi-valor-inventario");
-      if (elValor) elValor.textContent = formatoMoneda(r.valor_inventario);
+let ultimoResumenDashboard = null;
+let graficoGastosAnimado = false;
+let firmaKardex = null;          // para no redibujar el kardex si los datos no cambiaron
+let dashboardCargando = false;   // evita pedir el resumen dos veces a la vez
+let dashboardPendiente = false;  // si guardas algo mientras carga, se vuelve a cargar al terminar
+let cacheGastos = [];
+let periodoGastos = "mes";
+try{ periodoGastos = localStorage.getItem("agrocontrol_periodo_gastos") || "mes"; }catch(e){}
+if (!["mes", "trimestre", "anio", "todo"].includes(periodoGastos)) periodoGastos = "mes";
+let estadoGastos = null;   // {items, total, porcentajes, hover, pin}
 
-      const listaAlertas = document.getElementById("lista-alertas");
-      if (listaAlertas) {
-        if (!r.alertas_recientes || !r.alertas_recientes.length){
-          listaAlertas.innerHTML = '<div class="vacio">Sin alertas registradas.</div>';
-        } else {
-          listaAlertas.innerHTML = r.alertas_recientes.map(a => `
-            <div class="alerta-item">
-              <div class="alerta-sev ${a.severidad}"></div>
-              <div>
-                <div><strong>${a.titulo}</strong></div>
-                <div class="msg">${a.mensaje}</div>
-              </div>
-            </div>
-          `).join("");
-        }
-      }
+// Categorías del gráfico circular (el color viene de los tokens CSS)
+const CATEGORIAS_GASTO = [
+  {clave:"insumos",    nombre:"Insumos",      color:"var(--chart-insumos)"},
+  {clave:"mano_obra",  nombre:"Mano de obra", color:"var(--chart-mano-obra)"},
+  {clave:"maquinaria", nombre:"Maquinaria",   color:"var(--chart-maquinaria)"},
+  {clave:"otros",      nombre:"Otros",        color:"var(--chart-otros)"}
+];
 
-      const etiquetas = (r.movimientos_kardex_semanal || []).map(s => s.semana);
-      const entradas = (r.movimientos_kardex_semanal || []).map(s => s.entradas);
-      const salidas = (r.movimientos_kardex_semanal || []).map(s => s.salidas);
+// Datos de muestra: solo se usan si la API todavía no envía "gastos_por_categoria"
+const GASTOS_EJEMPLO = {insumos:11106000, mano_obra:6170000, maquinaria:4936000, otros:2468000};
 
-      const estiloOscuro = (document.documentElement.getAttribute("data-theme") === "oscuro");
-      const colorGrilla = estiloOscuro ? "#243026" : "#eef0e8";
-      const colorTexto = estiloOscuro ? "#9fac96" : "#666f5c";
+// Convierte cualquier nombre de categoría que venga de la API a una de las 4 categorías fijas
+function claveCategoriaGasto(texto){
+  const t = String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (t.includes("insumo")) return "insumos";
+  if (t.includes("mano") || t.includes("obra")) return "mano_obra";
+  if (t.includes("maquin")) return "maquinaria";
+  return "otros";
+}
 
-      const canvasGrafico = document.getElementById("grafico-kardex");
-      if (canvasGrafico) {
-        const ctx = canvasGrafico.getContext("2d");
-        if (typeof Chart === "undefined"){
-          canvasGrafico.closest(".panel").innerHTML =
-            '<h3>Entradas / Salidas de inventario</h3><div class="vacio">No se pudo cargar la librería de gráficos (Chart.js). Revisa tu conexión a internet o si algo está bloqueando cdn.jsdelivr.net.</div>';
-          return;
-        }
-        if (graficoKardex) graficoKardex.destroy();
-        graficoKardex = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels: etiquetas.length ? etiquetas : ["Sin datos"],
-            datasets: [
-              {label:"Entradas", data: entradas.length ? entradas : [0], backgroundColor:"#5b8c5a", borderRadius:6},
-              {label:"Salidas", data: salidas.length ? salidas : [0], backgroundColor:"#c17f2a", borderRadius:6},
-            ]
-          },
-          options: {
-            responsive:true,
-            maintainAspectRatio:false,
-            plugins:{legend:{position:"bottom", labels:{boxWidth:10, font:{size:12}, color:colorTexto}}},
-            scales:{
-              y:{beginAtZero:true, grid:{color:colorGrilla}, ticks:{color:colorTexto}},
-              x:{grid:{display:false}, ticks:{color:colorTexto}}
-            }
-          }
-        });
-      }
-    }
-  }catch(err){
-    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
-    else mostrarToast(err.message, true);
+// Acepta {insumos: 100, ...} o [{categoria:"Insumos", monto:100}, ...]
+function normalizarGastos(fuente){
+  const acum = {insumos:0, mano_obra:0, maquinaria:0, otros:0};
+  const sumar = (nombre, valor) => {
+    if (valor && typeof valor === "object") valor = valor.monto ?? valor.total ?? valor.valor;
+    const n = Number(valor);
+    if (Number.isFinite(n) && n > 0) acum[claveCategoriaGasto(nombre)] += n;
+  };
+  if (Array.isArray(fuente)){
+    fuente.forEach(it => sumar(it.categoria ?? it.nombre ?? it.label, it.monto ?? it.total ?? it.valor ?? it.gasto));
+  } else if (fuente && typeof fuente === "object"){
+    Object.entries(fuente).forEach(([nombre, valor]) => sumar(nombre, valor));
+  }
+  return acum;
+}
+
+// Porcentajes enteros que siempre suman 100 (método del mayor resto)
+function porcentajesEnteros(valores){
+  const total = valores.reduce((a, b) => a + b, 0);
+  if (!total) return valores.map(() => 0);
+  const bruto = valores.map(v => v / total * 100);
+  const base = bruto.map(Math.floor);
+  let faltan = 100 - base.reduce((a, b) => a + b, 0);
+  bruto.map((b, i) => ({i, resto: b - Math.floor(b)}))
+       .sort((a, b) => b.resto - a.resto)
+       .slice(0, faltan)
+       .forEach(o => { base[o.i] += 1; });
+  return base;
+}
+
+function formatoMonedaCentro(valor){
+  if (valor >= 1e9){
+    // Cifras muy grandes se abrevian en millones para que quepan dentro del círculo
+    return "$" + Math.round(valor / 1e6).toLocaleString("es-CO") + " M";
+  }
+  return formatoMoneda(valor);
+}
+
+function textoPorcentaje(valor, pct){
+  return (valor > 0 && pct === 0) ? "<1%" : pct + "%";
+}
+
+function renderGraficoGastos(fuente, esEjemplo){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo) return;
+  const pill = document.getElementById("gastos-ejemplo");
+  if (pill) pill.hidden = !esEjemplo;
+
+  const acum = normalizarGastos(fuente);
+  const items = CATEGORIAS_GASTO.map(c => Object.assign({}, c, {valor: acum[c.clave]}));
+  const total = items.reduce((suma, it) => suma + it.valor, 0);
+
+  // Si los datos son iguales a los que ya se ven, no se redibuja (evita parpadeos al actualizar solo)
+  const firma = JSON.stringify([acum, esEjemplo]);
+  if (total > 0 && estadoGastos && !estadoGastos.vacio && estadoGastos.firma === firma
+      && document.querySelector("#gastos-cuerpo .donut-caja")) return;
+
+  if (!total){
+    estadoGastos = {vacio:true};
+    cuerpo.removeAttribute("data-foco");
+    cuerpo.classList.remove("animar");
+    cuerpo.innerHTML = `
+      <div class="gastos-vacio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/>
+        </svg>
+        <strong>Aún no hay gastos en este período</strong>
+        <span>Registra un gasto y aquí verás cómo se reparte entre insumos, mano de obra, maquinaria y otros.</span>
+        <button type="button" class="btn-secundario" onclick="abrirModal('gasto')">+ Registrar gasto</button>
+      </div>`;
+    return;
+  }
+
+  const porcentajes = porcentajesEnteros(items.map(it => it.valor));
+  const R = 78, SW = 18, C = 2 * Math.PI * R, GAP = SW + 5;
+  const activos = items.filter(it => it.valor > 0).length;
+
+  let inicio = 0;
+  const segmentos = items.map((it, i) => {
+    if (!it.valor) return "";
+    const largo = it.valor / total * C;
+    const unico = activos === 1;
+    const dash = unico ? C : Math.max(largo - GAP, 0.01);
+    const desplazamiento = unico ? 0 : inicio + GAP / 2;
+    inicio += largo;
+    return `<circle class="donut-seg${unico ? " donut-seg--unico" : ""}" data-idx="${i}"
+              cx="100" cy="100" r="${R}"
+              style="--c:${it.color}; --dash:${dash.toFixed(2)}; --off:${(-desplazamiento).toFixed(2)}; --i:${i}"/>`;
+  }).join("");
+
+  const resumenAccesible = items
+    .map((it, i) => `${it.nombre} ${textoPorcentaje(it.valor, porcentajes[i])}`).join(", ");
+
+  const filas = items.map((it, i) => `
+    <li>
+      <button type="button" class="gasto-fila" data-idx="${i}" aria-pressed="false"
+              style="--c:${it.color}; --w:${it.valor / total * 100}%; --i:${i}">
+        <span class="gasto-fila__punto"></span>
+        <span class="gasto-fila__nombre">${it.nombre}</span>
+        <span class="gasto-fila__monto">${formatoMoneda(it.valor)}</span>
+        <span class="gasto-fila__pct">${textoPorcentaje(it.valor, porcentajes[i])}</span>
+        <span class="gasto-fila__barra"><i></i></span>
+      </button>
+    </li>`).join("");
+
+  const pinAnterior = (estadoGastos && !estadoGastos.vacio) ? estadoGastos.pin : null;
+  estadoGastos = {vacio:false, items, total, porcentajes, hover:null, pin:pinAnterior, firma};
+
+  cuerpo.classList.toggle("animar", !graficoGastosAnimado);
+  graficoGastosAnimado = true;
+  cuerpo.innerHTML = `
+    <div class="donut-caja">
+      <svg class="donut-svg" viewBox="0 0 200 200" role="img"
+           aria-label="Distribución de gastos por categoría: ${resumenAccesible}"
+           style="--C:${C.toFixed(2)}; --sw:${SW}px">
+        <g transform="rotate(-90 100 100)">
+          <circle class="donut-pista" cx="100" cy="100" r="${R}"/>
+          ${segmentos}
+        </g>
+      </svg>
+      <div class="donut-centro">
+        <span class="donut-centro__label" id="donut-label"></span>
+        <strong class="donut-centro__valor" id="donut-valor"></strong>
+        <span class="donut-centro__sub" id="donut-sub"></span>
+      </div>
+    </div>
+    <ul class="gastos-leyenda">${filas}</ul>`;
+
+  aplicarFocoGastos();
+}
+
+// Resalta la categoría enfocada (hover, teclado o toque) y actualiza el centro del gráfico
+function aplicarFocoGastos(){
+  const e = estadoGastos;
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!e || e.vacio || !cuerpo) return;
+
+  const idx = e.hover ?? e.pin;
+  if (idx === null) cuerpo.removeAttribute("data-foco");
+  else cuerpo.setAttribute("data-foco", String(idx));
+
+  cuerpo.querySelectorAll("[data-idx]").forEach(el => {
+    const activo = Number(el.dataset.idx) === idx;
+    el.classList.toggle("foco", activo);
+    if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", String(e.pin === Number(el.dataset.idx)));
+  });
+
+  const label = document.getElementById("donut-label");
+  const valor = document.getElementById("donut-valor");
+  const sub = document.getElementById("donut-sub");
+  if (!label || !valor || !sub) return;
+
+  if (idx === null){
+    const mayor = e.items.reduce((m, it, i) => (it.valor > e.items[m].valor ? i : m), 0);
+    label.textContent = "Total gastos";
+    valor.textContent = formatoMonedaCentro(e.total);
+    sub.textContent = `Mayor: ${e.items[mayor].nombre} ${textoPorcentaje(e.items[mayor].valor, e.porcentajes[mayor])}`;
+  } else {
+    const it = e.items[idx];
+    label.innerHTML = `<i class="punto" style="--c:${it.color}"></i>${it.nombre}`;
+    valor.textContent = formatoMonedaCentro(it.valor);
+    sub.textContent = `${textoPorcentaje(it.valor, e.porcentajes[idx])} del total`;
   }
 }
 
+// Eventos del gráfico de gastos (se registran una sola vez, con delegación)
+(function activarInteraccionGastos(){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo) return;
+  const indiceDe = (el) => {
+    const nodo = el && el.closest ? el.closest("[data-idx]") : null;
+    return nodo ? Number(nodo.dataset.idx) : null;
+  };
+  cuerpo.addEventListener("pointerover", (ev) => {
+    if (ev.pointerType !== "mouse" || !estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = indiceDe(ev.target);
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("pointerleave", (ev) => {
+    if (ev.pointerType !== "mouse" || !estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = null;
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("focusin", (ev) => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    const i = indiceDe(ev.target);
+    if (i !== null){ estadoGastos.hover = i; aplicarFocoGastos(); }
+  });
+  cuerpo.addEventListener("focusout", () => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = null;
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("click", (ev) => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    const i = indiceDe(ev.target);
+    if (i === null) return;
+    estadoGastos.pin = (estadoGastos.pin === i) ? null : i;
+    aplicarFocoGastos();
+  });
+})();
+
+(function iniciarSelectorPeriodo(){
+  const sel = document.getElementById("gastos-periodo");
+  if (!sel) return;
+  sel.value = periodoGastos;
+  sel.addEventListener("change", () => {
+    periodoGastos = sel.value;
+    try{ localStorage.setItem("agrocontrol_periodo_gastos", periodoGastos); }catch(e){}
+    cargarDashboard();
+  });
+})();
+
+function formatoFechaCorta(iso){
+  const d = new Date(String(iso).slice(0, 10) + "T00:00:00");
+  return isNaN(d) ? escaparHtml(iso) : d.toLocaleDateString("es-CO", {day:"numeric", month:"short", year:"numeric"});
+}
+
+// Tabla "Gastos registrados" (lista === null significa que no se pudo cargar)
+function renderTablaGastos(lista){
+  const cuerpo = document.getElementById("tabla-gastos-cuerpo");
+  if (!cuerpo) return;
+  if (lista === null){
+    if (!cacheGastos.length) cuerpo.innerHTML = '<tr><td colspan="5" class="vacio">No se pudo cargar la lista de gastos.</td></tr>';
+    return;
+  }
+  cacheGastos = lista;
+  if (!lista.length){
+    cuerpo.innerHTML = '<tr><td colspan="5" class="vacio">Aún no hay gastos en este período.</td></tr>';
+    return;
+  }
+  cuerpo.innerHTML = lista.map(g => {
+    const cat = CATEGORIAS_GASTO.find(c => c.clave === claveCategoriaGasto(g.categoria)) || CATEGORIAS_GASTO[3];
+    return `
+      <tr>
+        <td class="celda-fecha">${formatoFechaCorta(g.fecha)}</td>
+        <td><span class="gasto-cat" style="--c:${cat.color}"><i></i>${cat.nombre}</span></td>
+        <td class="celda-desc" title="${escaparHtml(g.descripcion)}">${escaparHtml(g.descripcion)}</td>
+        <td class="celda-monto">${formatoMoneda(g.monto)}</td>
+        <td>${botonesAccion("gasto", g.id)}</td>
+      </tr>`;
+  }).join("");
+}
+
+function mostrarGastosNoDisponibles(){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo || estadoGastos) return;
+  cuerpo.innerHTML = '<div class="vacio">No se pudieron cargar los gastos. Intenta de nuevo en unos segundos.</div>';
+}
+
+function leerTokenCss(nombre, alternativo){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+  return v || alternativo;
+}
+
+function renderGraficoKardex(r, forzar){
+  const canvas = document.getElementById("grafico-kardex");
+  const contenedor = document.getElementById("kardex-contenedor");
+  const vacio = document.getElementById("kardex-vacio");
+  if (!canvas || !contenedor || !vacio) return;
+
+  const semanas = (r && r.movimientos_kardex_semanal) || [];
+
+  if (typeof Chart === "undefined"){
+    contenedor.hidden = true;
+    vacio.hidden = false;
+    vacio.textContent = "No se pudo cargar la librería de gráficos (Chart.js). Revisa tu conexión a internet o si algo está bloqueando cdn.jsdelivr.net.";
+    return;
+  }
+  if (!semanas.length){
+    if (graficoKardex){ graficoKardex.destroy(); graficoKardex = null; }
+    contenedor.hidden = true;
+    vacio.hidden = false;
+    vacio.textContent = "Aún no hay movimientos de inventario en las últimas semanas.";
+    return;
+  }
+  contenedor.hidden = false;
+  vacio.hidden = true;
+
+  const firma = JSON.stringify(semanas);
+  if (!forzar && graficoKardex && firmaKardex === firma) return;
+  firmaKardex = firma;
+
+  // Colores desde los tokens CSS: cambian solos con el modo claro/oscuro
+  const colorEntradas = leerTokenCss("--chart-entradas", "#16a97a");
+  const colorSalidas  = leerTokenCss("--chart-salidas", "#d99420");
+  const colorTexto    = leerTokenCss("--text-muted", "#5c6570");
+  const colorTitulo   = leerTokenCss("--text-main", "#12161a");
+  const colorGrilla   = leerTokenCss("--border-subtle", "#e6e8eb");
+  const colorPanel    = leerTokenCss("--surface-panel", "#ffffff");
+  const colorBorde    = leerTokenCss("--border-strong", "#d3d7dc");
+  const fuente = "'Inter', system-ui, sans-serif";
+
+  if (graficoKardex) graficoKardex.destroy();
+  graficoKardex = new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: semanas.map(s => s.semana),
+      datasets: [
+        {label:"Entradas", data: semanas.map(s => s.entradas || 0), backgroundColor: colorEntradas, borderRadius: 8, borderSkipped: false, maxBarThickness: 26},
+        {label:"Salidas",  data: semanas.map(s => s.salidas  || 0), backgroundColor: colorSalidas,  borderRadius: 8, borderSkipped: false, maxBarThickness: 26}
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {mode: "index", intersect: false},
+      datasets: {bar: {categoryPercentage: 0.72, barPercentage: 0.9}},
+      plugins: {
+        legend: {
+          position: "top", align: "end",
+          labels: {usePointStyle: true, pointStyle: "circle", boxWidth: 8, boxHeight: 8, padding: 14, color: colorTexto, font: {family: fuente, size: 12, weight: "600"}}
+        },
+        tooltip: {
+          backgroundColor: colorPanel, titleColor: colorTitulo, bodyColor: colorTexto,
+          borderColor: colorBorde, borderWidth: 1, padding: 12, cornerRadius: 12,
+          boxPadding: 5, usePointStyle: true,
+          titleFont: {family: fuente, weight: "700"}, bodyFont: {family: fuente},
+          callbacks: {label: (c) => ` ${c.dataset.label}: ${Number(c.parsed.y).toLocaleString("es-CO")}`}
+        }
+      },
+      scales: {
+        y: {beginAtZero: true, border: {display: false}, grid: {color: colorGrilla, borderDash: [4, 4]}, ticks: {color: colorTexto, padding: 8, font: {family: fuente, size: 11}}},
+        x: {border: {display: false}, grid: {display: false}, ticks: {color: colorTexto, font: {family: fuente, size: 11}}}
+      }
+    }
+  });
+}
+
+// Chart.js pinta con colores fijos: al cambiar de tema hay que redibujar el kardex
+// y avisarle al manual (iframe) para que también cambie de tema.
+new MutationObserver(() => {
+  if (ultimoResumenDashboard) renderGraficoKardex(ultimoResumenDashboard, true);
+  sincronizarTemaManual();
+}).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+
+async function cargarDashboard(opciones = {}){
+  if (dashboardCargando){
+    if (!opciones.silencioso) dashboardPendiente = true;   // se vuelve a cargar cuando termine la actual
+    return;
+  }
+  dashboardCargando = true;
+  try{
+    const [r, listaGastos] = await Promise.all([
+      apiFetch("/api/dashboard/resumen?periodo=" + encodeURIComponent(periodoGastos)),
+      apiFetch("/api/gastos?limite=10&periodo=" + encodeURIComponent(periodoGastos)).catch(() => null)
+    ]);
+    if (!r) return;
+    ultimoResumenDashboard = r;
+
+    const elCiclos = document.getElementById("kpi-ciclos-activos");
+    if (elCiclos) elCiclos.textContent = r.ciclos_activos ?? 0;
+    const elAlertas = document.getElementById("kpi-alertas-criticas");
+    if (elAlertas) elAlertas.textContent = r.alertas_criticas ?? 0;
+    const elStock = document.getElementById("kpi-stock-critico");
+    if (elStock) elStock.textContent = r.productos_stock_critico ?? 0;
+    const elValor = document.getElementById("kpi-valor-inventario");
+    if (elValor) elValor.textContent = formatoMoneda(r.valor_inventario);
+
+    const listaAlertas = document.getElementById("lista-alertas");
+    if (listaAlertas) {
+      if (!r.alertas_recientes || !r.alertas_recientes.length){
+        listaAlertas.innerHTML = '<div class="vacio">Sin alertas registradas.</div>';
+      } else {
+        listaAlertas.innerHTML = r.alertas_recientes.map(a => `
+          <div class="alerta-item">
+            <div class="alerta-sev ${a.severidad}"></div>
+            <div>
+              <div><strong>${a.titulo}</strong></div>
+              <div class="msg">${a.mensaje}</div>
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    // Gastos por categoría: la API debe enviar "gastos_por_categoria"
+    const gastosApi = r.gastos_por_categoria ?? r.gastos ?? r.distribucion_gastos;
+    if (gastosApi === undefined || gastosApi === null){
+      console.info("[AgroControl] /api/dashboard/resumen no incluye 'gastos_por_categoria'; se muestran datos de ejemplo.");
+      renderGraficoGastos(GASTOS_EJEMPLO, true);
+    } else {
+      renderGraficoGastos(gastosApi, false);
+    }
+
+    renderGraficoKardex(r);
+    renderTablaGastos(listaGastos);
+  }catch(err){
+    mostrarGastosNoDisponibles();
+    if (opciones.silencioso) return;   // las actualizaciones automáticas no molestan con avisos
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }finally{
+    dashboardCargando = false;
+    if (dashboardPendiente){ dashboardPendiente = false; cargarDashboard(); }
+  }
+}
+
+/* --- Actualización automática del dashboard ---
+   Se refresca solo cada 20 s mientras la pestaña está a la vista y estás en
+   el Dashboard, y al volver a la pestaña. */
+const INTERVALO_DASHBOARD_MS = 20000;
+function dashboardVisible(){
+  const app = document.getElementById("app");
+  const sec = document.getElementById("seccion-dashboard");
+  return !document.hidden && !!TOKEN && !!app && app.classList.contains("activo")
+      && !!sec && sec.classList.contains("activa");
+}
+setInterval(() => { if (dashboardVisible()) cargarDashboard({silencioso:true}); }, INTERVALO_DASHBOARD_MS);
+document.addEventListener("visibilitychange", () => { if (dashboardVisible()) cargarDashboard({silencioso:true}); });
+
 /* ==========================================================================
-   UTILIDADES DE TABLAS (BOTONES DE ACCIÓN, EDITAR, BORRAR)
+   G. UTILIDADES DE TABLAS (BOTONES DE ACCIÓN, EDITAR, BORRAR)
    ========================================================================== */
 function botonesAccion(tipo, id){
   return `
@@ -903,16 +1324,16 @@ function botonesAccion(tipo, id){
 }
 
 window.editarRegistro = (tipo, id) => {
-  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual};
+  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual, gasto: cacheGastos};
   const registro = (mapaCache[tipo] || []).find(item => item.id === id);
   if (registro) abrirModal(tipo, registro);
 };
 
 window.borrarRegistro = async (tipo, id) => {
-  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual};
-  const mapaRecarga = {bodega: cargarInventario, finca: cargarAdministracion, lote: cargarAdministracion, proveedor: cargarAdministracion};
+  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual, gasto: cacheGastos};
+  const mapaRecarga = {bodega: cargarInventario, finca: cargarAdministracion, lote: cargarAdministracion, proveedor: cargarAdministracion, gasto: cargarDashboard};
   const registro = (mapaCache[tipo] || []).find(item => item.id === id);
-  const nombreMostrado = registro?.nombre || `#${id}`;
+  const nombreMostrado = registro?.nombre || registro?.descripcion || `#${id}`;
   if (!confirm(`¿Seguro que quieres borrar "${nombreMostrado}"? Esta acción no se puede deshacer.`)) return;
   try{
     await apiFetch(`${formulariosModal[tipo].endpoint}/${id}`, {method:"DELETE"});
@@ -939,7 +1360,7 @@ window.toggleEstadoBodega = async (id, nuevoEstado) => {
 };
 
 /* ==========================================================================
-   MÓDULO: INVENTARIO Y BODEGAS
+   H. MÓDULO: INVENTARIO Y BODEGAS
    ========================================================================== */
 async function cargarInventario(){
   try{
@@ -1031,7 +1452,7 @@ document.getElementById("form-movimiento").addEventListener("submit", async (e)=
 });
 
 /* ==========================================================================
-   MÓDULO: POTREROS Y GANADO
+   I. MÓDULO: POTREROS Y GANADO
    ========================================================================== */
 async function cargarPotreros(){
   try{
@@ -1131,7 +1552,7 @@ window.borrarAnimal = async (animalId) => {
 };
 
 /* ==========================================================================
-   MÓDULO: PRODUCCIÓN AGRÍCOLA
+   J. MÓDULO: PRODUCCIÓN AGRÍCOLA
    ========================================================================== */
 async function cargarProduccion(){
   try{
@@ -1195,7 +1616,7 @@ document.getElementById("form-cosecha").addEventListener("submit", async (e)=>{
 });
 
 /* ==========================================================================
-   MÓDULO: ADMINISTRACIÓN (FINCAS, LOTES, PROVEEDORES)
+   K. MÓDULO: ADMINISTRACIÓN (FINCAS, LOTES, PROVEEDORES)
    ========================================================================== */
 async function cargarAdministracion(){
   try{
@@ -1254,7 +1675,7 @@ function actualizarChipOrganizacion(){
 }
 
 /* ==========================================================================
-   FINCA ACTIVA (selector superior + validación estricta para bodegas)
+   L. FINCA ACTIVA (selector + validación estricta para bodegas)
    ========================================================================== */
 function renderSelectoresFinca(){
   const fincasActivas = (cacheFincas || []).filter(f => f.activo);
@@ -1306,7 +1727,7 @@ function intentarAbrirModalBodega(){
 window.intentarAbrirModalBodega = intentarAbrirModalBodega;
 
 /* ==========================================================================
-   MODAL DE CONFIGURACIÓN (esquina superior derecha)
+   M. MODAL DE CONFIGURACIÓN (esquina superior derecha)
    ========================================================================== */
 function abrirModalConfiguracion(){
   const cont = document.getElementById("modal-contenido");
@@ -1349,7 +1770,7 @@ function abrirModalConfiguracion(){
 window.abrirModalConfiguracion = abrirModalConfiguracion;
 
 /* ==========================================================================
-   MÓDULO: REPORTES
+   N. MÓDULO: REPORTES
    ========================================================================== */
 async function cargarReportes(){
   try{
@@ -1441,7 +1862,32 @@ function descargarReporteCosechas(formato){
 window.descargarReporteCosechas = descargarReporteCosechas;
 
 /* ==========================================================================
-   MODALES GENÉRICOS (CREAR / EDITAR REGISTROS)
+   Ñ. MÓDULO: MANUAL DE USUARIO
+   El manual vive en "manual.html" y se muestra dentro de un iframe para no
+   perder el menú lateral. Se carga la primera vez que entras a la sección.
+   ========================================================================== */
+function temaActualApp(){
+  return document.documentElement.getAttribute("data-theme") || "claro";
+}
+
+function cargarManual(){
+  const marco = document.getElementById("iframe-manual");
+  if (!marco) return;
+  if (!marco.getAttribute("src")){
+    marco.setAttribute("src", "manual.html?tema=" + encodeURIComponent(temaActualApp()));
+  }
+}
+window.cargarManual = cargarManual;
+
+// Si cambias el modo claro/oscuro con el manual ya abierto, se recarga con el tema nuevo.
+function sincronizarTemaManual(){
+  const marco = document.getElementById("iframe-manual");
+  if (!marco || !marco.getAttribute("src")) return;
+  marco.setAttribute("src", "manual.html?tema=" + encodeURIComponent(temaActualApp()));
+}
+
+/* ==========================================================================
+   O. MODALES GENÉRICOS (CREAR / EDITAR REGISTROS)
    ========================================================================== */
 const formulariosModal = {
   bodega: {
@@ -1512,6 +1958,20 @@ const formulariosModal = {
             {id:"peso_kg", label:"Peso (kg)", tipo:"number", requerido:true, min:0},
             {id:"estado_salud", label:"Estado de salud", tipo:"text", valor:"saludable", requerido:true},
             {id:"potrero_id", label:"Potrero", tipo:"select", requerido:true, obtenerOpciones: () => (cachePotreros || []).map(p => ({ valor: p.id, etiqueta: p.nombre }))}]
+  },
+  gasto: {
+    titulo:"Registrar gasto", endpoint:"/api/gastos", recargar: cargarDashboard,
+    camposEdicion:["categoria", "descripcion", "monto", "fecha", "finca_id"],
+    campos:[{id:"categoria", label:"Categoría", tipo:"select", requerido:true,
+              opciones:[{valor:"insumos", etiqueta:"Insumos"}, {valor:"mano_de_obra", etiqueta:"Mano de obra"},
+                        {valor:"maquinaria", etiqueta:"Maquinaria"}, {valor:"otros", etiqueta:"Otros"}]},
+            {id:"descripcion", label:"Descripción", tipo:"text", requerido:true},
+            {id:"monto", label:"Monto ($)", tipo:"number", requerido:true, min:0},
+            {id:"fecha", label:"Fecha", tipo:"date", requerido:true,
+              obtenerValorInicial: () => new Date().toLocaleDateString("en-CA")},
+            {id:"finca_id", label:"Finca", tipo:"select",
+              obtenerOpciones: () => (cacheFincas || []).filter(f => f.activo).map(f => ({ valor: f.id, etiqueta: f.nombre })),
+              obtenerValorInicial: () => fincaActivaId || ""}]
   },
   pasto: {
     titulo:"Nuevo tipo de pasto", endpoint:"/api/admin/pastos", recargar: cargarPotreros,
@@ -1596,7 +2056,7 @@ function abrirModal(tipo, registro=null){
       cerrarModal();
       conf.recargar();
     }catch(err){
-      const msgError = err.message === "ERR_NETWORK_DISCONNECTED" 
+      const msgError = err.message === "ERR_NETWORK_DISCONNECTED"
         ? "No se pudo conectar con el servidor (http://localhost:8000). Verifique la conexión."
         : (err.message || "Error al guardar el registro");
       mostrarToast(msgError, true);
@@ -1611,7 +2071,7 @@ function cerrarModal(){
 }
 
 /* ==========================================================================
-   ARRANQUE: procesa el regreso de Google (si aplica) y luego decide si
+   P. ARRANQUE: procesa el regreso de Google (si aplica) y luego decide si
    entra directo a la app con una sesión ya guardada.
    ========================================================================== */
 async function procesarRegresoDeGoogle() {
@@ -1619,8 +2079,7 @@ async function procesarRegresoDeGoogle() {
   const tokenRecibido = fragmento.get("access_token");
   if (!tokenRecibido) return false;
 
-  // Limpiamos el token de la URL de inmediato (no debe quedar en el
-  // historial del navegador).
+  // Limpiamos el token de la URL de inmediato (no debe quedar en el historial).
   history.replaceState(null, "", window.location.pathname + window.location.search);
 
   TOKEN = tokenRecibido;

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual de usuario — AgroControl Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  // Sincroniza el tema con AgroControl Pro: primero mira si vino por la URL
+  // (?tema=claro|oscuro, como lo manda el iframe del index), y si no,
+  // usa el mismo valor guardado por la app principal en localStorage.
+  (function(){
+    try{
+      const parametro = new URLSearchParams(location.search).get("tema");
+      const guardado = localStorage.getItem("agrocontrol_tema");
+      const tema = parametro || guardado || "claro";
+      document.documentElement.setAttribute("data-theme", tema === "oscuro" ? "dark" : "light");
+    }catch(e){}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#f5f7f6;
+    --surface:#ffffff;
+    --surface-2:#eef3f1;
+    --border:#dbe4e0;
+    --text:#10201b;
+    --text-muted:#5b6b66;
+    --accent:#0e9d6e;
+    --accent-strong:#0a7a56;
+    --accent-soft:#e2f6ee;
+    --danger:#c94b4b;
+    --warn:#b07a1c;
+    --radius:14px;
+    --sidebar-w:264px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a0f0d;
+      --surface:#121b19;
+      --surface-2:#16211e;
+      --border:#233530;
+      --text:#eef4f2;
+      --text-muted:#8fa39d;
+      --accent:#2fe5a3;
+      --accent-strong:#57edb4;
+      --accent-soft:#123226;
+      --danger:#ef6b6b;
+      --warn:#f2b84b;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0f0d;
+    --surface:#121b19;
+    --surface-2:#16211e;
+    --border:#233530;
+    --text:#eef4f2;
+    --text-muted:#8fa39d;
+    --accent:#2fe5a3;
+    --accent-strong:#57edb4;
+    --accent-soft:#123226;
+    --danger:#ef6b6b;
+    --warn:#f2b84b;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; scroll-padding-top:96px;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    line-height:1.55;
+  }
+  h1,h2,h3{font-family:'Manrope', 'Inter', sans-serif; letter-spacing:-0.01em; margin:0;}
+
+  a{color:var(--accent-strong);}
+
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    padding-top:env(safe-area-inset-top,0px);
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; gap:14px;
+    padding:16px 24px;
+  }
+  .logo-chip{
+    width:38px; height:38px; border-radius:10px;
+    background:var(--accent); color:#06231a;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Manrope',sans-serif; font-weight:800; font-size:15px;
+    flex-shrink:0;
+  }
+  .topbar-titles{display:flex; flex-direction:column; gap:1px;}
+  .topbar-titles .app{font-family:'Manrope',sans-serif; font-weight:800; font-size:16.5px;}
+  .topbar-titles .sub{font-size:12.5px; color:var(--text-muted);}
+
+  .layout{
+    max-width:1180px; margin:0 auto;
+    display:grid;
+    grid-template-columns:var(--sidebar-w) 1fr;
+    gap:36px;
+    padding:32px 24px 80px;
+    align-items:start;
+  }
+
+  nav.toc{
+    position:sticky; top:78px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    max-height:calc(100vh - 110px);
+    overflow-y:auto;
+  }
+  nav.toc .eyebrow{
+    font-size:11.5px; color:var(--text-muted);
+    margin-bottom:10px; font-weight:600;
+  }
+  nav.toc ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px;}
+  nav.toc a{
+    display:flex; align-items:center; gap:10px;
+    text-decoration:none; color:var(--text);
+    padding:9px 10px; border-radius:9px; font-size:14px;
+  }
+  nav.toc a:hover{background:var(--surface-2);}
+  nav.toc a.active{background:var(--accent-soft); color:var(--accent-strong); font-weight:600;}
+  nav.toc svg{flex-shrink:0; width:17px; height:17px;}
+
+  main{min-width:0;}
+
+  .hero{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px 30px 26px;
+    margin-bottom:28px;
+  }
+  .hero .kicker{
+    display:inline-block;
+    font-size:11.5px; font-weight:700; letter-spacing:0.02em;
+    color:var(--accent-strong);
+    background:var(--accent-soft);
+    padding:4px 10px; border-radius:999px;
+    margin-bottom:14px;
+  }
+  .hero h1{font-size:clamp(24px,3.4vw,32px); font-weight:800; max-width:26ch;}
+  .hero p{color:var(--text-muted); max-width:62ch; margin-top:12px; font-size:15px;}
+  .hero .note{
+    margin-top:18px;
+    display:flex; gap:10px;
+    font-size:13px; color:var(--text-muted);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px;
+  }
+
+  section.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px 30px;
+    margin-bottom:22px;
+    scroll-margin-top:90px;
+  }
+  section.card h2{
+    display:flex; align-items:center; gap:12px;
+    font-size:21px; font-weight:800; margin-bottom:6px;
+  }
+  section.card h2 .icon-wrap{
+    width:34px; height:34px; border-radius:9px;
+    background:var(--accent-soft); color:var(--accent-strong);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  section.card h2 .icon-wrap svg{width:19px; height:19px;}
+  section.card > p.lead{color:var(--text-muted); font-size:14.5px; margin:10px 0 20px; max-width:66ch;}
+
+  .block{margin-top:22px;}
+  .block:first-of-type{margin-top:4px;}
+  .block h3{font-size:15.5px; font-weight:700; margin-bottom:8px;}
+  .block p{margin:0 0 8px; font-size:14.5px; color:var(--text);}
+  .block ul{margin:8px 0 0; padding-left:20px; font-size:14.5px;}
+  .block li{margin-bottom:5px;}
+  .block li b{font-weight:600;}
+
+  .btn-tag{
+    display:inline-flex; align-items:center; gap:5px;
+    background:var(--accent-soft); color:var(--accent-strong);
+    border:1px solid var(--accent-strong);
+    border-radius:7px; padding:1px 8px; font-size:13px; font-weight:600;
+    font-family:'Inter',sans-serif;
+  }
+  .field-tag{
+    display:inline-block;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:6px; padding:1px 7px; font-size:13px; font-weight:600;
+  }
+
+  .subgrid{
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  }
+  @media (max-width:720px){.subgrid{grid-template-columns:1fr;}}
+
+  .mini-table{
+    width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;
+    border:1px solid var(--border); border-radius:8px; overflow:hidden;
+  }
+  .mini-table th, .mini-table td{
+    text-align:left; padding:7px 10px; border-bottom:1px solid var(--border);
+  }
+  .mini-table th{background:var(--surface-2); font-weight:600; color:var(--text-muted); font-size:12px;}
+  .mini-table tr:last-child td{border-bottom:none;}
+
+  footer{
+    max-width:1180px; margin:0 auto; padding:0 24px 50px;
+    color:var(--text-muted); font-size:12.5px;
+  }
+
+  @media (max-width:880px){
+    .layout{grid-template-columns:1fr; padding-top:20px;}
+    nav.toc{
+      position:static; max-height:none;
+      display:flex; flex-wrap:nowrap; overflow-x:auto;
+      gap:4px; padding:12px;
+    }
+    nav.toc .eyebrow{display:none;}
+    nav.toc ul{flex-direction:row; gap:6px;}
+    nav.toc a{white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo-chip">AC</div>
+    <div class="topbar-titles">
+      <span class="app">AgroControl Pro</span>
+      <span class="sub">Manual de usuario</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="Contenido del manual">
+    <div class="eyebrow">CONTENIDO</div>
+    <ul id="toc-list">
+      <li><a href="#acceso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>Acceso al sistema</a></li>
+      <li><a href="#configuracion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Configuración general</a></li>
+      <li><a href="#navegacion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="14" width="8" height="6" rx="1.5"/></svg>Navegación general</a></li>
+      <li><a href="#dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</a></li>
+      <li><a href="#inventario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>Inventario y Bodegas</a></li>
+      <li><a href="#potreros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10h18M3 14h18M6 6v12M18 6v12M9 3l-3 3M15 3l3 3M9 21l-3-3M15 21l3-3"/></svg>Potreros y Ganado</a></li>
+      <li><a href="#produccion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22v-9"/><path d="M12 13c-4 0-7-3-7-7 4 0 7 3 7 7Z"/><path d="M12 13c4 0 7-3 7-7-4 0-7 3-7 7Z"/></svg>Producción Agrícola</a></li>
+      <li><a href="#administracion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18"/><path d="M8 4v6"/></svg>Administración</a></li>
+      <li><a href="#reportes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Reportes</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <span class="kicker">TRAZABILIDAD TOTAL</span>
+      <h1>Manual de usuario de AgroControl Pro</h1>
+      <p>Esta guía explica cómo usar cada pantalla de AgroControl Pro: inventario y bodegas, potreros y ganado, producción agrícola, administración de fincas y reportes. Está escrita para el usuario que opera la plataforma día a día.</p>
+      <div class="note">
+        📌 Los nombres de fincas, bodegas y productos que aparecen aquí son ejemplos ilustrativos, no datos reales del sistema. Use los suyos al registrar información.
+      </div>
+    </div>
+
+    <section class="card" id="acceso">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg></span>Acceso al sistema</h2>
+      <p class="lead">La pantalla de inicio presenta la marca AgroControl Pro y una breve descripción de la plataforma antes de pedir el inicio de sesión.</p>
+      <div class="block">
+        <h3>Iniciar sesión</h3>
+        <ul>
+          <li>Se abre el cuadro <b>Iniciar sesión o registrarse</b> sobre la pantalla de bienvenida.</li>
+          <li>Pulse <span class="btn-tag">Continuar con Google</span> y seleccione la cuenta de Google asociada a su usuario.</li>
+          <li>El sistema valida el correo con Google, crea o recupera su usuario y abre el Dashboard automáticamente.</li>
+          <li>Si aún no tiene una cuenta en la plataforma, use el enlace <b>¿No tienes cuenta? Regístrate</b> debajo del botón.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card" id="configuracion">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>Configuración general</h2>
+      <p class="lead">El ícono de engranaje ⚙️, siempre visible en la esquina superior derecha, abre el panel de Configuración desde cualquier pantalla.</p>
+      <div class="block">
+        <ul>
+          <li><span class="field-tag">Modo oscuro</span> — interruptor que cambia la apariencia de toda la plataforma entre modo claro y oscuro.</li>
+          <li><span class="field-tag">Finca activa</span> — selector que define qué finca se usa para validar bodegas nuevas y para filtrar los reportes. Todo lo que registre mientras esa finca esté seleccionada queda asociado a ella.</li>
+          <li><span class="field-tag">Sesión</span> — muestra el usuario conectado y su rol (por ejemplo, "Operador") y ofrece el botón <b>Cerrar sesión</b>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card" id="navegacion">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="14" width="8" height="6" rx="1.5"/></svg></span>Navegación general</h2>
+      <p class="lead">El menú lateral izquierdo organiza toda la plataforma en dos grupos.</p>
+      <div class="block subgrid">
+        <div>
+          <h3>Operación</h3>
+          <p>El trabajo del día a día en campo y bodega: <b>Dashboard</b>, <b>Inventario y Bodegas</b>, <b>Potreros y Ganado</b>, <b>Producción Agrícola</b>.</p>
+        </div>
+        <div>
+          <h3>Gestión</h3>
+          <p>Configuración de la operación y análisis: <b>Administración</b> (fincas, lotes, proveedores), <b>Reportes</b> y este <b>Manual de usuario</b>.</p>
+        </div>
+      </div>
+      <div class="block">
+        <p>Un punto verde junto a una opción del menú indica el módulo que está abierto en ese momento. En la parte superior del menú también aparece el nombre de la finca activa.</p>
+      </div>
+    </section>
+
+    <section class="card" id="dashboard">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>Dashboard</h2>
+      <p class="lead">El "Dashboard operativo" resume, para la fecha actual, el estado de la finca activa.</p>
+      <div class="block">
+        <h3>Indicadores superiores</h3>
+        <ul>
+          <li><b>Ciclos activos</b> — número de ciclos productivos en curso.</li>
+          <li><b>Alertas críticas</b> — incidencias que requieren atención inmediata.</li>
+          <li><b>Productos en stock crítico</b> — insumos por debajo de su stock mínimo.</li>
+          <li><b>Valor total de inventario</b> — valor monetario de todo lo almacenado.</li>
+        </ul>
+      </div>
+      <div class="block subgrid">
+        <div>
+          <h3>Gastos por categoría</h3>
+          <p>Gráfico de cómo se reparte el gasto de la operación (insumos, mano de obra, maquinaria, otros) en el período elegido con el selector "Este mes". Se completa a medida que registra gastos.</p>
+        </div>
+        <div>
+          <h3>Entradas y salidas de inventario</h3>
+          <p>Movimientos de bodega de las últimas semanas, tomados del Kardex registrado en Inventario y Bodegas.</p>
+        </div>
+      </div>
+      <div class="block">
+        <h3>Gastos registrados</h3>
+        <p>Tabla con fecha, categoría, descripción, monto y acciones de cada gasto de la finca activa. El botón <span class="btn-tag">+ Registrar gasto</span> abre el formulario para añadir uno nuevo, tanto desde aquí como desde el panel de "Gastos por categoría".</p>
+      </div>
+    </section>
+
+    <section class="card" id="inventario">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span>Inventario y Bodegas</h2>
+      <p class="lead">Controla dónde están almacenados los insumos y cuánto queda de cada uno.</p>
+
+      <div class="block">
+        <h3>Bodegas</h3>
+        <p>Tabla con nombre, ubicación, finca, estado (activa/inactiva) y acciones de cada bodega de almacenamiento.</p>
+        <table class="mini-table">
+          <tr><th>Nombre</th><th>Ubicación</th><th>Finca</th><th>Estado</th></tr>
+          <tr><td>Bodega principal</td><td>Casco de la finca</td><td>Finca activa</td><td>Activa</td></tr>
+        </table>
+        <p style="margin-top:8px">El botón <span class="btn-tag">+ Nueva bodega</span> registra una bodega adicional. Desde la columna "Acciones" puede editarla o cambiar su estado con <b>Habilitar / Deshabilitar</b>.</p>
+      </div>
+
+      <div class="block">
+        <h3>Registrar movimiento (Kardex)</h3>
+        <p>Formulario para dejar constancia de cada entrada o salida de un producto:</p>
+        <ul>
+          <li><span class="field-tag">Producto</span> — insumo afectado.</li>
+          <li><span class="field-tag">Bodega</span> — dónde ocurre el movimiento.</li>
+          <li><span class="field-tag">Tipo</span> — Entrada o Salida.</li>
+          <li><span class="field-tag">Cantidad</span></li>
+          <li><span class="field-tag">Referencia</span> (opcional) — número de factura u orden de compra.</li>
+        </ul>
+        <p>El botón <span class="btn-tag">Registrar movimiento</span> guarda el registro; se refleja de inmediato en el stock del producto y en el panel de entradas y salidas del Dashboard.</p>
+      </div>
+
+      <div class="block">
+        <h3>Productos e Insumos</h3>
+        <p>Listado con código, nombre, categoría, stock actual, stock mínimo, precio unitario, estado y acciones. La barra de búsqueda filtra por código o nombre.</p>
+        <p>El botón <span class="btn-tag">+ Nuevo producto</span> da de alta un insumo; una vez creado, aparecerá disponible en el formulario de Registrar movimiento.</p>
+      </div>
+    </section>
+
+    <section class="card" id="potreros">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10h18M3 14h18M6 6v12M18 6v12M9 3l-3 3M15 3l3 3M9 21l-3-3M15 21l3-3"/></svg></span>Potreros y Ganado</h2>
+      <p class="lead">Lleva el control del terreno destinado a pastoreo y de los animales de la finca.</p>
+
+      <div class="block">
+        <h3>Capacidad por potrero</h3>
+        <p>Muestra la capacidad de carga de cada potrero de la finca activa. El botón <span class="btn-tag">+ Nuevo potrero</span> registra uno nuevo.</p>
+      </div>
+
+      <div class="block">
+        <h3>Registro de animales</h3>
+        <p>Tabla con arete (identificador del animal), peso, estado de salud, potrero donde se encuentra y acciones.</p>
+        <p>El botón <span class="btn-tag">+ Registrar animal</span> añade un ejemplar nuevo al inventario ganadero.</p>
+      </div>
+
+      <div class="block">
+        <h3>Tipos de Pastos y Forrajes</h3>
+        <p>Catálogo de variedades de pasto disponibles para los potreros, con su descripción, estado (activo/inactivo) y acciones para editarlas o deshabilitarlas:</p>
+        <table class="mini-table">
+          <tr><th>Nombre</th><th>Descripción</th></tr>
+          <tr><td>Brachiaria decumbens</td><td>Pasto tropical de excelente cobertura</td></tr>
+          <tr><td>Kikuyo (Cenchrus clandestinus)</td><td>Resistente al pastoreo en clima frío/medio</td></tr>
+          <tr><td>Mombaça (Panicum maximum)</td><td>Alto rendimiento en biomasa y nutrientes</td></tr>
+          <tr><td>Pangola (Digitaria eriantha)</td><td>Excelente palatabilidad para el ganado</td></tr>
+          <tr><td>Pasto Caimán</td><td>Tolerante a suelos húmedos e inundables</td></tr>
+        </table>
+        <p style="margin-top:8px">El botón <span class="btn-tag">+ Nuevo pasto</span> agrega una variedad adicional al catálogo.</p>
+      </div>
+    </section>
+
+    <section class="card" id="produccion">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22v-9"/><path d="M12 13c-4 0-7-3-7-7 4 0 7 3 7 7Z"/><path d="M12 13c4 0 7-3 7-7-4 0-7 3-7 7Z"/></svg></span>Producción Agrícola</h2>
+      <p class="lead">Registra los cultivos, las labores diarias y las cosechas de cada ciclo productivo.</p>
+
+      <div class="block">
+        <h3>Ciclos productivos</h3>
+        <p>Tabla con nombre del ciclo, cultivo, lote, fecha de inicio y estado. El botón <span class="btn-tag">+ Nuevo ciclo</span> abre un cultivo nuevo (por ejemplo, una siembra en un lote determinado), que después aparecerá disponible en los formularios de actividad y cosecha.</p>
+      </div>
+
+      <div class="block subgrid">
+        <div>
+          <h3>Registrar actividad diaria</h3>
+          <p>Deja trazabilidad de las labores de campo:</p>
+          <ul>
+            <li><span class="field-tag">Ciclo productivo</span></li>
+            <li><span class="field-tag">Tipo de actividad</span> (riego, fumigación, poda…)</li>
+            <li><span class="field-tag">Fecha</span></li>
+            <li><span class="field-tag">Responsable</span></li>
+          </ul>
+          <p><span class="btn-tag">Guardar actividad</span> la añade al historial del ciclo.</p>
+        </div>
+        <div>
+          <h3>Registrar cosecha</h3>
+          <p>Anota cada recolección:</p>
+          <ul>
+            <li><span class="field-tag">Ciclo productivo</span></li>
+            <li><span class="field-tag">Fecha</span></li>
+            <li><span class="field-tag">Cantidad (kg)</span></li>
+            <li><span class="field-tag">Calidad</span> (por ejemplo, "Primera")</li>
+          </ul>
+          <p><span class="btn-tag">Guardar cosecha</span> la suma a la producción del ciclo y alimenta el reporte de Cosechas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="administracion">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18"/><path d="M8 4v6"/></svg></span>Administración</h2>
+      <p class="lead">Configura las fincas, lotes y proveedores que usan el resto de los módulos.</p>
+
+      <div class="block">
+        <h3>Fincas</h3>
+        <p>Tabla con nombre, ubicación, área en hectáreas y acciones de cada finca gestionada en la plataforma.</p>
+        <table class="mini-table">
+          <tr><th>Nombre</th><th>Ubicación</th><th>Área (ha)</th></tr>
+          <tr><td>Finca La Esperanza</td><td>Vereda El Rosal</td><td>30</td></tr>
+        </table>
+        <p style="margin-top:8px">El botón <span class="btn-tag">+ Nueva finca</span> da de alta una finca adicional, que luego puede elegirse como finca activa desde el menú lateral o desde Configuración.</p>
+      </div>
+
+      <div class="block subgrid">
+        <div>
+          <h3>Lotes</h3>
+          <p>Tabla con nombre, cultivo, área y acciones de cada lote de una finca. El botón <span class="btn-tag">+ Nuevo lote</span> crea una subdivisión de terreno para asociarla luego a los ciclos productivos.</p>
+        </div>
+        <div>
+          <h3>Proveedores</h3>
+          <p>Tabla con nombre, NIT, contacto, teléfono y acciones de cada proveedor. El botón <span class="btn-tag">+ Nuevo proveedor</span> registra uno nuevo, útil al asociar compras de insumos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="reportes">
+      <h2><span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></span>Reportes</h2>
+      <p class="lead">Análisis descargables de la operación, en Excel o PDF.</p>
+      <div class="block">
+        <h3>Filtrar por finca</h3>
+        <p>Acota los tres reportes siguientes a una finca específica antes de descargarlos.</p>
+      </div>
+      <div class="block subgrid">
+        <div>
+          <h3>Inventario actual</h3>
+          <p>Stock, valor y estado crítico de todos los productos activos.</p>
+        </div>
+        <div>
+          <h3>Kardex de movimientos</h3>
+          <p>Entradas, salidas y ajustes dentro de un rango de fechas, definido con los campos <span class="field-tag">Desde</span> y <span class="field-tag">Hasta</span>.</p>
+        </div>
+      </div>
+      <div class="block">
+        <h3>Cosechas</h3>
+        <p>Producción registrada en el período, con filtro opcional de <span class="field-tag">Ciclo productivo</span> — déjelo en "Todos los ciclos" para incluirlas todas.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Manual de usuario · AgroControl Pro
+</footer>
+
+<script>
+  // Scrollspy
+  const links = Array.from(document.querySelectorAll('nav.toc a'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  const setActive = (id) => {
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+  };
+  try {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+    sections.forEach(s => s && observer.observe(s));
+  } catch (e) {}
+</script>
+
+</body>
+</html>

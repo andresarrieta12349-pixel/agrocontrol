@@ -4,10 +4,10 @@ models.py
 Modelos SQLAlchemy (ORM) para AgroControl Pro.
 Cubre: Usuarios/Autenticación, Administración (Fincas, Lotes, Proveedores, Pastos),
 Inventario (Bodegas, Productos, Kardex) y Producción Agrícola
-(Ciclos, Actividades, Cosechas) + Alertas para el dashboard.
+(Ciclos, Actividades, Cosechas) + Alertas para el dashboard + Gastos.
 """
 import enum
-from datetime import datetime
+from datetime import datetime, date
 
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, DateTime, Date, Text,
@@ -49,6 +49,13 @@ class SeveridadAlerta(str, enum.Enum):
     BAJA = "baja"
     MEDIA = "media"
     CRITICA = "critica"
+
+
+class CategoriaGasto(str, enum.Enum):
+    INSUMOS = "insumos"
+    MANO_DE_OBRA = "mano_de_obra"
+    MAQUINARIA = "maquinaria"
+    OTROS = "otros"
 
 
 # ---------------------------------------------------------------------------
@@ -280,4 +287,20 @@ class Alerta(Base):
     severidad = Column(Enum(SeveridadAlerta), default=SeveridadAlerta.MEDIA)
     modulo = Column(String(50), nullable=True)
     resuelta = Column(Boolean, default=False)
+    creado_en = Column(DateTime, default=datetime.utcnow)
+
+
+# ---------------------------------------------------------------------------
+# GASTOS (alimentan el gráfico circular del dashboard)
+# ---------------------------------------------------------------------------
+class Gasto(Base):
+    __tablename__ = "gastos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    finca_id = Column(Integer, ForeignKey("fincas.id"), nullable=True)
+    categoria = Column(Enum(CategoriaGasto), nullable=False)
+    descripcion = Column(String(255), nullable=False)
+    monto = Column(Float, nullable=False, default=0.0)
+    fecha = Column(Date, nullable=False, default=date.today)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     creado_en = Column(DateTime, default=datetime.utcnow)

@@ -4,10 +4,13 @@ schemas.py
 Esquemas Pydantic v2 utilizados para validación de entrada/salida.
 """
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
-from app.models import RolUsuario, ProveedorAutenticacion, TipoMovimiento, EstadoCiclo, SeveridadAlerta
+from app.models import (
+    RolUsuario, ProveedorAutenticacion, TipoMovimiento, EstadoCiclo,
+    SeveridadAlerta, CategoriaGasto,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -373,6 +376,36 @@ class CosechaOut(CosechaBase):
 
 
 # ---------------------------------------------------------------------------
+# GASTOS
+# ---------------------------------------------------------------------------
+class GastoBase(BaseModel):
+    categoria: CategoriaGasto
+    descripcion: str = Field(..., min_length=1, max_length=255)
+    monto: float = Field(..., gt=0)
+    fecha: date
+    finca_id: Optional[int] = None
+
+
+class GastoCreate(GastoBase):
+    pass
+
+
+class GastoUpdate(BaseModel):
+    categoria: Optional[CategoriaGasto] = None
+    descripcion: Optional[str] = Field(None, min_length=1, max_length=255)
+    monto: Optional[float] = Field(None, gt=0)
+    fecha: Optional[date] = None
+    finca_id: Optional[int] = None
+
+
+class GastoOut(GastoBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    usuario_id: Optional[int] = None
+    creado_en: datetime
+
+
+# ---------------------------------------------------------------------------
 # ALERTAS Y DASHBOARD
 # ---------------------------------------------------------------------------
 class AlertaOut(BaseModel):
@@ -402,6 +435,7 @@ class DashboardResumen(BaseModel):
     valor_inventario: float
     movimientos_kardex_semanal: List[SerieSemanal]
     alertas_recientes: List[AlertaOut]
+    gastos_por_categoria: Dict[str, float] = {}
 
 
 TokenResponse.model_rebuild()

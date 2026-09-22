@@ -4,23 +4,47 @@ routers/dashboard.py
 Endpoint agregador para el Dashboard Operativo: KPIs de ciclos activos,
 alertas críticas, stock crítico y series semanales de entradas/salidas
 de inventario (kardex) para graficar con Chart.js.
+
+Incluye también la distribución de gastos por categoría para el gráfico
+circular del dashboard (Insumos, Mano de obra, Maquinaria, Otros), calculada
+a partir de los gastos que se registran en la tabla "gastos".
 """
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
 from app.auth import get_current_user
+from app.routers.gastos import fecha_desde_periodo
 
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
 
+def calcular_gastos_por_categoria(db: Session, desde: Optional[date]) -> dict:
+    """
+    Suma los gastos registrados por categoría desde la fecha `desde`
+    (None = todo el historial). Siempre devuelve las 4 categorías.
+    """
+    resultado = {categoria.value: 0.0 for categoria in models.CategoriaGasto}
+
+    consulta = db.query(models.Gasto.categoria, func.sum(models.Gasto.monto))
+    if desde is not None:
+        consulta = consulta.filter(models.Gasto.fecha >= desde)
+
+    for categoria, total in consulta.group_by(models.Gasto.categoria).all():
+        clave = categoria.value if hasattr(categoria, "value") else str(categoria)
+        resultado[clave] = round(float(total or 0), 2)
+    return resultado
+
+
 @router.get("/resumen", response_model=schemas.DashboardResumen, summary="Resumen operativo (KPIs)")
 def resumen(
+    periodo: str = Query("mes", description="Período del gráfico de gastos: mes | trimestre | anio | todo"),
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(get_current_user),
 ):
@@ -79,6 +103,9 @@ def resumen(
         .all()
     )
 
+    # --- Gastos por categoría (gráfico circular) ---
+    gastos_por_categoria = calcular_gastos_por_categoria(db, fecha_desde_periodo(periodo))
+
     return schemas.DashboardResumen(
         ciclos_activos=ciclos_activos,
         ciclos_planificados=ciclos_planificados,
@@ -89,4 +116,5 @@ def resumen(
         valor_inventario=round(valor_inventario, 2),
         movimientos_kardex_semanal=movimientos_kardex_semanal,
         alertas_recientes=alertas_recientes,
+        gastos_por_categoria=gastos_por_categoria,
     )
