@@ -1,8 +1,25 @@
+# Secretos: NUNCA al repositorio
+.env
+.env.*
+!.env.example
+
+# Bases de datos y copias de seguridad
+*.db
+*.sqlite3
+*.sql
+*.dump
+backups/
+
+# Python
 __pycache__/
 *.pyc
-*.db
-.env
 .venv/
 venv/
 *.egg-info/
+
+# Logs y sistema
+*.log
 .DS_Store
+.idea/
+.vscode/
+

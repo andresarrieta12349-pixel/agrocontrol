@@ -18,6 +18,11 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
+# La app corre con un usuario sin privilegios: si alguien lograra ejecutar
+# código dentro del contenedor, no tendría permisos de administrador.
+RUN useradd --system --uid 10001 --no-create-home appuser
+USER appuser
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \

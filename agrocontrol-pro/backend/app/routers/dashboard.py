@@ -44,7 +44,7 @@ def calcular_gastos_por_categoria(db: Session, desde: Optional[date]) -> dict:
 
 @router.get("/resumen", response_model=schemas.DashboardResumen, summary="Resumen operativo (KPIs)")
 def resumen(
-    periodo: str = Query("mes", description="Período del gráfico de gastos: mes | trimestre | anio | todo"),
+    periodo: str = Query("mes", pattern="^(mes|trimestre|anio|todo)$", description="Período del gráfico de gastos: mes | trimestre | anio | todo"),
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(get_current_user),
 ):

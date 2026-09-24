@@ -25,6 +25,7 @@ Login con Google (OAuth 2.0, flujo de redirección con código de autorización)
      de vuelta al frontend, con el token en el fragmento de la URL
      (después de "#"), que nunca se envía a ningún servidor.
 """
+import logging
 import os
 import secrets
 from typing import Optional
@@ -45,6 +46,14 @@ from app.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
 from app.services.auth_service import auth_service
+from app.security import (
+    ES_PRODUCCION,
+    LimitadorIntentos,
+    exigir_sin_bloqueo,
+    ip_cliente,
+)
+
+logger = logging.getLogger("agrocontrol.auth_router")
 
 # ---------------------------------------------------------------------------
 # Configuración de Google OAuth 2.0 (flujo de redirección con código)
@@ -58,22 +67,38 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080").strip().rstrip
 
 # En producción (HTTPS) esta variable debe ser "true" para que la cookie
 # de "state" sólo viaje por conexiones seguras.
-COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").strip().lower() == "true"
+# Por defecto es "true" en producción (la cookie sólo viaja por HTTPS).
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "true" if ES_PRODUCCION else "false").strip().lower() == "true"
 
 OAUTH_STATE_COOKIE = "agrocontrol_oauth_state"
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticación"])
 
+# Anti fuerza bruta: intentos FALLIDOS por cuenta y por IP en 15 minutos, y
+# altas de cuenta por IP por hora.
+_limitador_login_cuenta = LimitadorIntentos(max_intentos=8, ventana_segundos=900)
+_limitador_login_ip = LimitadorIntentos(max_intentos=30, ventana_segundos=900)
+_limitador_registro_ip = LimitadorIntentos(max_intentos=5, ventana_segundos=3600)
+
 
 def _construir_flow_google() -> Flow:
     """Crea el objeto Flow de google-auth-oauthlib con la configuración del servidor."""
-    if not (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET and GOOGLE_REDIRECT_URI):
+    variables_requeridas = {
+        "GOOGLE_CLIENT_ID": GOOGLE_CLIENT_ID,
+        "GOOGLE_CLIENT_SECRET": GOOGLE_CLIENT_SECRET,
+        "GOOGLE_REDIRECT_URI": GOOGLE_REDIRECT_URI,
+    }
+    faltantes = [nombre for nombre, valor in variables_requeridas.items() if not valor]
+    if faltantes:
+        # El detalle (qué variable falta exactamente) va al log, no a la
+        # respuesta pública, para no filtrar configuración interna al usuario.
+        logger.error(
+            "Google OAuth sin configurar: falta(n) %s en las variables de entorno.",
+            ", ".join(faltantes),
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=(
-                "La autenticación con Google no está configurada en el servidor "
-                "(faltan GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o GOOGLE_REDIRECT_URI)."
-            ),
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="El inicio de sesión con Google no está disponible en este momento.",
         )
     return Flow.from_client_config(
         {
@@ -99,8 +124,11 @@ def _redirigir_con_error(mensaje: str) -> RedirectResponse:
 
 
 @router.post("/register", response_model=schemas.TokenResponse, status_code=status.HTTP_201_CREATED)
-def register(payload: schemas.UsuarioRegister, db: Session = Depends(get_db)):
+def register(request: Request, payload: schemas.UsuarioRegister, db: Session = Depends(get_db)):
     """Registra un usuario operativo usando correo y contraseña."""
+    clave_ip = f"ip:{ip_cliente(request)}"
+    exigir_sin_bloqueo((_limitador_registro_ip, clave_ip))
+    _limitador_registro_ip.registrar(clave_ip)
     try:
         usuario = auth_service.register(db, payload)
     except ValueError as error:
@@ -115,7 +143,7 @@ def register(payload: schemas.UsuarioRegister, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=schemas.TokenResponse, summary="Iniciar sesión")
-def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
+def login(request: Request, payload: schemas.LoginRequest, db: Session = Depends(get_db)):
     """
     Autentica al usuario usando **correo, teléfono o nombre de usuario**
     junto con su contraseña, y retorna un token JWT.
@@ -123,12 +151,19 @@ def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
     Las cuentas creadas mediante Google no tienen contraseña y por lo
     tanto no pueden iniciar sesión por esta vía.
     """
+    clave_cuenta = f"cuenta:{payload.identificador.strip().lower()}"
+    clave_ip = f"ip:{ip_cliente(request)}"
+    exigir_sin_bloqueo((_limitador_login_cuenta, clave_cuenta), (_limitador_login_ip, clave_ip))
+
     usuario = auth_service.authenticate(db, payload.identificador, payload.password)
     if not usuario:
+        _limitador_login_cuenta.registrar(clave_cuenta)
+        _limitador_login_ip.registrar(clave_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Identificador o contraseña incorrectos",
         )
+    _limitador_login_cuenta.reiniciar(clave_cuenta)
 
     token = create_access_token(data={"sub": str(usuario.id), "rol": usuario.rol.value})
     return schemas.TokenResponse(
@@ -195,10 +230,10 @@ def google_callback(
     try:
         token_google = flow.fetch_token(code=code)
     except Exception as e:
-        # NOTA TEMPORAL DE DIAGNÓSTICO: imprime el error real en los logs
-        # del backend (docker logs agrocontrol_backend) para poder ver
-        # exactamente por qué Google rechazó el intercambio del código.
-        print("ERROR GOOGLE TOKEN:", repr(e))
+        # Sólo se registra el tipo de error: el detalle completo puede incluir
+        # códigos o tokens. Para depurar, activar el nivel DEBUG temporalmente.
+        logger.warning("Falló el intercambio del código con Google (%s)", type(e).__name__)
+        logger.debug("Detalle del error de Google: %r", e)
         return _redirigir_con_error("No se pudo validar la respuesta de Google.")
 
     id_token_bruto = token_google.get("id_token") if isinstance(token_google, dict) else None

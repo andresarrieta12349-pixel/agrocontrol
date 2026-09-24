@@ -43,7 +43,7 @@ def _obtener_gasto(db: Session, gasto_id: int) -> models.Gasto:
 
 @router.get("", response_model=List[schemas.GastoOut], summary="Listar gastos")
 def listar_gastos(
-    periodo: str = Query("mes", description="mes | trimestre | anio | todo"),
+    periodo: str = Query("mes", pattern="^(mes|trimestre|anio|todo)$", description="mes | trimestre | anio | todo"),
     limite: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(get_current_user),

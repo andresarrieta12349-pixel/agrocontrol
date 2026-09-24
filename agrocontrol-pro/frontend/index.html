@@ -579,7 +579,8 @@
 /* ==========================================================================
    A. CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN
    ========================================================================== */
-const API_BASE = (window.AGROCONTROL_API_BASE) || "http://localhost:8000";
+const API_BASE = window.AGROCONTROL_API_BASE ??
+  (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://localhost:8000" : "");
 
 let TOKEN = localStorage.getItem("agrocontrol_token") || null;
 let USUARIO = JSON.parse(localStorage.getItem("agrocontrol_usuario") || "null");
@@ -616,7 +617,7 @@ window.obtenerProducto = (productId) => cacheProductos.find((product) => product
 function notificarDesconexionApiOnce() {
   if (!apiOfflineNotificado) {
     apiOfflineNotificado = true;
-    mostrarToast("Servidor API (http://localhost:8000) no disponible. Ejecuta uvicorn para habilitar la sincronización.", true);
+    mostrarToast("No hay conexión con el servidor. Inténtalo de nuevo en unos segundos.", true);
   }
 }
 
@@ -989,14 +990,14 @@ function renderGraficoGastos(fuente, esEjemplo){
   }).join("");
 
   const resumenAccesible = items
-    .map((it, i) => `${it.nombre} ${textoPorcentaje(it.valor, porcentajes[i])}`).join(", ");
+    .map((it, i) => `${escaparHtml(it.nombre)} ${textoPorcentaje(it.valor, porcentajes[i])}`).join(", ");
 
   const filas = items.map((it, i) => `
     <li>
       <button type="button" class="gasto-fila" data-idx="${i}" aria-pressed="false"
               style="--c:${it.color}; --w:${it.valor / total * 100}%; --i:${i}">
         <span class="gasto-fila__punto"></span>
-        <span class="gasto-fila__nombre">${it.nombre}</span>
+        <span class="gasto-fila__nombre">${escaparHtml(it.nombre)}</span>
         <span class="gasto-fila__monto">${formatoMoneda(it.valor)}</span>
         <span class="gasto-fila__pct">${textoPorcentaje(it.valor, porcentajes[i])}</span>
         <span class="gasto-fila__barra"><i></i></span>
@@ -1057,7 +1058,7 @@ function aplicarFocoGastos(){
     sub.textContent = `Mayor: ${e.items[mayor].nombre} ${textoPorcentaje(e.items[mayor].valor, e.porcentajes[mayor])}`;
   } else {
     const it = e.items[idx];
-    label.innerHTML = `<i class="punto" style="--c:${it.color}"></i>${it.nombre}`;
+    label.innerHTML = `<i class="punto" style="--c:${it.color}"></i>${escaparHtml(it.nombre)}`;
     valor.textContent = formatoMonedaCentro(it.valor);
     sub.textContent = `${textoPorcentaje(it.valor, e.porcentajes[idx])} del total`;
   }
@@ -1134,7 +1135,7 @@ function renderTablaGastos(lista){
     return `
       <tr>
         <td class="celda-fecha">${formatoFechaCorta(g.fecha)}</td>
-        <td><span class="gasto-cat" style="--c:${cat.color}"><i></i>${cat.nombre}</span></td>
+        <td><span class="gasto-cat" style="--c:${cat.color}"><i></i>${escaparHtml(cat.nombre)}</span></td>
         <td class="celda-desc" title="${escaparHtml(g.descripcion)}">${escaparHtml(g.descripcion)}</td>
         <td class="celda-monto">${formatoMoneda(g.monto)}</td>
         <td>${botonesAccion("gasto", g.id)}</td>
@@ -1264,10 +1265,10 @@ async function cargarDashboard(opciones = {}){
       } else {
         listaAlertas.innerHTML = r.alertas_recientes.map(a => `
           <div class="alerta-item">
-            <div class="alerta-sev ${a.severidad}"></div>
+            <div class="alerta-sev ${escaparHtml(a.severidad)}"></div>
             <div>
-              <div><strong>${a.titulo}</strong></div>
-              <div class="msg">${a.mensaje}</div>
+              <div><strong>${escaparHtml(a.titulo)}</strong></div>
+              <div class="msg">${escaparHtml(a.mensaje)}</div>
             </div>
           </div>
         `).join("");
@@ -1378,9 +1379,9 @@ async function cargarInventario(){
         const finca = (cacheFincas || []).find(f => f.id === b.finca_id);
         return `
         <tr>
-          <td>${b.nombre}</td>
-          <td>${b.ubicacion || "—"}</td>
-          <td>${finca ? finca.nombre : (b.finca_id ? `#${b.finca_id}` : "—")}</td>
+          <td>${escaparHtml(b.nombre)}</td>
+          <td>${escaparHtml(b.ubicacion || "—")}</td>
+          <td>${finca ? escaparHtml(finca.nombre) : (b.finca_id ? `#${b.finca_id}` : "—")}</td>
           <td><span class="badge ${b.activo ? 'ok' : 'critico'}">${b.activo ? 'Activa' : 'Inactiva'}</span></td>
           <td>
             <button class="btn-icono" title="Editar" onclick="editarRegistro('bodega', ${b.id})">
@@ -1398,9 +1399,9 @@ async function cargarInventario(){
     renderizarProductos();
 
     const selProducto = document.getElementById("mov-producto");
-    if (selProducto) selProducto.innerHTML = (cacheProductos || []).map(p => `<option value="${p.id}">${p.nombre} (${p.codigo})</option>`).join("");
+    if (selProducto) selProducto.innerHTML = (cacheProductos || []).map(p => `<option value="${p.id}">${escaparHtml(p.nombre)} (${escaparHtml(p.codigo)})</option>`).join("");
     const selBodega = document.getElementById("mov-bodega");
-    if (selBodega) selBodega.innerHTML = (cacheBodegas || []).filter(b => b.activo).map(b => `<option value="${b.id}">${b.nombre}</option>`).join("");
+    if (selBodega) selBodega.innerHTML = (cacheBodegas || []).filter(b => b.activo).map(b => `<option value="${b.id}">${escaparHtml(b.nombre)}</option>`).join("");
   }catch(err){
     if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
     else mostrarToast(err.message, true);
@@ -1481,8 +1482,8 @@ function renderPastos(pastos){
   if (!cuerpo) return;
   cuerpo.innerHTML = pastos.map(p => `
     <tr>
-      <td><strong>${p.nombre}</strong></td>
-      <td>${p.descripcion || "—"}</td>
+      <td><strong>${escaparHtml(p.nombre)}</strong></td>
+      <td>${escaparHtml(p.descripcion || "—")}</td>
       <td><span class="badge ${p.activo ? 'ok' : 'critico'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
       <td>
         <button class="btn-tabla ${p.activo ? 'danger' : ''}" type="button" onclick="toggleEstadoPasto(${p.id}, ${!p.activo})">
@@ -1562,14 +1563,14 @@ async function cargarProduccion(){
     if (tablaCiclos) {
       tablaCiclos.innerHTML = (cacheCiclos || []).map(c => `
         <tr>
-          <td>${c.nombre}</td><td>${c.cultivo}</td><td>Lote #${c.lote_id}</td>
-          <td>${c.fecha_inicio}</td>
-          <td><span class="badge ${c.estado}">${c.estado}</span></td>
+          <td>${escaparHtml(c.nombre)}</td><td>${escaparHtml(c.cultivo)}</td><td>Lote #${c.lote_id}</td>
+          <td>${escaparHtml(c.fecha_inicio)}</td>
+          <td><span class="badge ${escaparHtml(c.estado)}">${escaparHtml(c.estado)}</span></td>
         </tr>
       `).join("") || '<tr><td colspan="5" class="vacio">Sin ciclos registrados</td></tr>';
     }
 
-    const opciones = (cacheCiclos || []).map(c => `<option value="${c.id}">${c.nombre} — ${c.cultivo}</option>`).join("");
+    const opciones = (cacheCiclos || []).map(c => `<option value="${c.id}">${escaparHtml(c.nombre)} — ${escaparHtml(c.cultivo)}</option>`).join("");
     const actCiclo = document.getElementById("act-ciclo");
     if (actCiclo) actCiclo.innerHTML = opciones;
     const cosCiclo = document.getElementById("cos-ciclo");
@@ -1632,7 +1633,7 @@ async function cargarAdministracion(){
     const tablaFincas = document.getElementById("tabla-fincas");
     if (tablaFincas) {
       tablaFincas.innerHTML = (cacheFincas || []).map(f => `
-        <tr><td>${f.nombre}</td><td>${f.ubicacion || "—"}</td><td>${f.area_hectareas}</td>
+        <tr><td>${escaparHtml(f.nombre)}</td><td>${escaparHtml(f.ubicacion || "—")}</td><td>${escaparHtml(f.area_hectareas)}</td>
         <td>${botonesAccion('finca', f.id)}</td></tr>
       `).join("") || '<tr><td colspan="4" class="vacio">Sin fincas registradas</td></tr>';
     }
@@ -1640,7 +1641,7 @@ async function cargarAdministracion(){
     const tablaLotes = document.getElementById("tabla-lotes");
     if (tablaLotes) {
       tablaLotes.innerHTML = (cacheLotesActual || []).map(l => `
-        <tr><td>${l.nombre}</td><td>${l.tipo_cultivo || "—"}</td><td>${l.area_hectareas}</td>
+        <tr><td>${escaparHtml(l.nombre)}</td><td>${escaparHtml(l.tipo_cultivo || "—")}</td><td>${escaparHtml(l.area_hectareas)}</td>
         <td>${botonesAccion('lote', l.id)}</td></tr>
       `).join("") || '<tr><td colspan="4" class="vacio">Sin lotes registrados</td></tr>';
     }
@@ -1648,7 +1649,7 @@ async function cargarAdministracion(){
     const tablaProveedores = document.getElementById("tabla-proveedores");
     if (tablaProveedores) {
       tablaProveedores.innerHTML = (cacheProveedoresActual || []).map(p => `
-        <tr><td>${p.nombre}</td><td>${p.nit || "—"}</td><td>${p.contacto || "—"}</td><td>${p.telefono || "—"}</td>
+        <tr><td>${escaparHtml(p.nombre)}</td><td>${escaparHtml(p.nit || "—")}</td><td>${escaparHtml(p.contacto || "—")}</td><td>${escaparHtml(p.telefono || "—")}</td>
         <td>${botonesAccion('proveedor', p.id)}</td></tr>
       `).join("") || '<tr><td colspan="5" class="vacio">Sin proveedores registrados</td></tr>';
     }
@@ -1686,7 +1687,7 @@ function renderSelectoresFinca(){
   }
 
   const opciones = '<option value="">Selecciona una finca…</option>' +
-    fincasActivas.map(f => `<option value="${f.id}" ${String(f.id) === String(fincaActivaId) ? "selected" : ""}>${f.nombre}</option>`).join("");
+    fincasActivas.map(f => `<option value="${f.id}" ${String(f.id) === String(fincaActivaId) ? "selected" : ""}>${escaparHtml(f.nombre)}</option>`).join("");
 
   const selectorConfig = document.getElementById("config-finca-activa");
   if (selectorConfig) selectorConfig.innerHTML = opciones;
@@ -1755,7 +1756,7 @@ function abrirModalConfiguracion(){
       <div class="config-fila">
         <div>
           <div class="config-fila__titulo">Sesión</div>
-          <div class="config-fila__sub">${(USUARIO && (USUARIO.nombre_completo || USUARIO.nombre_usuario)) || "—"} · ${(USUARIO && USUARIO.rol) || "—"}</div>
+          <div class="config-fila__sub">${escaparHtml((USUARIO && (USUARIO.nombre_completo || USUARIO.nombre_usuario)) || "—")} · ${escaparHtml((USUARIO && USUARIO.rol) || "—")}</div>
         </div>
         <button type="button" class="btn-secundario" onclick="cerrarModal(); cerrarSesion();">Cerrar sesión</button>
       </div>
@@ -1784,13 +1785,13 @@ async function cargarReportes(){
     const select = document.getElementById("reporte-cosecha-ciclo");
     if (select) {
       select.innerHTML = '<option value="">Todos los ciclos</option>' +
-        (cacheCiclos || []).map(c => `<option value="${c.id}">${c.nombre} — ${c.cultivo}</option>`).join("");
+        (cacheCiclos || []).map(c => `<option value="${c.id}">${escaparHtml(c.nombre)} — ${escaparHtml(c.cultivo)}</option>`).join("");
     }
 
     const selectorFincaReporte = document.getElementById("reporte-finca");
     if (selectorFincaReporte) {
       selectorFincaReporte.innerHTML = '<option value="">Todas las fincas</option>' +
-        (cacheFincas || []).filter(f => f.activo).map(f => `<option value="${f.id}">${f.nombre}</option>`).join("");
+        (cacheFincas || []).filter(f => f.activo).map(f => `<option value="${f.id}">${escaparHtml(f.nombre)}</option>`).join("");
       // Por defecto se preselecciona la finca activa, pero el usuario puede
       // cambiarla libremente sólo para efectos del reporte a descargar.
       selectorFincaReporte.value = fincaActivaId || "";
@@ -2002,7 +2003,7 @@ function abrirModal(tipo, registro=null){
                 <label>${c.label}</label>
                 <select id="campo-${c.id}" ${c.requerido ? "required" : ""} ${noEditableAlEditar ? "disabled" : ""}>
                   <option value="">-- Seleccionar ${c.label.toLowerCase()} --</option>
-                  ${opciones.map(o => `<option value="${o.valor}" ${String(o.valor) === String(valorActual) ? "selected" : ""}>${o.etiqueta}</option>`).join("")}
+                  ${opciones.map(o => `<option value="${escaparHtml(o.valor)}" ${String(o.valor) === String(valorActual) ? "selected" : ""}>${escaparHtml(o.etiqueta)}</option>`).join("")}
                 </select>
               </div>
             `;
@@ -2010,7 +2011,7 @@ function abrirModal(tipo, registro=null){
           return `
             <div class="campo">
               <label>${c.label} (ID)</label>
-              <input type="number" id="campo-${c.id}" ${c.requerido ? "required" : ""} min="1" step="1" value="${valorActual || 1}" />
+              <input type="number" id="campo-${c.id}" ${c.requerido ? "required" : ""} min="1" step="1" value="${escaparHtml(valorActual || 1)}" />
             </div>
           `;
         }
@@ -2023,7 +2024,7 @@ function abrirModal(tipo, registro=null){
             ${c.min !== undefined ? `min="${c.min}"` : ""}
             ${c.tipo === "number" ? 'step="0.01"' : ""}
             ${(registro && c.id === "codigo") || noEditableAlEditar ? "readonly" : ""}
-            value="${valorActual}" />
+            value="${escaparHtml(valorActual)}" />
         </div>
       `;}).join("")}
       <div class="modal-acciones">
@@ -2057,7 +2058,7 @@ function abrirModal(tipo, registro=null){
       conf.recargar();
     }catch(err){
       const msgError = err.message === "ERR_NETWORK_DISCONNECTED"
-        ? "No se pudo conectar con el servidor (http://localhost:8000). Verifique la conexión."
+        ? "No se pudo conectar con el servidor. Verifica tu conexión."
         : (err.message || "Error al guardar el registro");
       mostrarToast(msgError, true);
     }
@@ -2110,7 +2111,7 @@ function mostrarErrorDeGoogleSiExiste() {
   history.replaceState(null, "", window.location.pathname);
   const errorBox = document.getElementById("error-login");
   if (errorBox) {
-    errorBox.textContent = decodeURIComponent(mensajeError);
+    errorBox.textContent = "No se pudo iniciar sesión con Google. Inténtalo de nuevo.";
     errorBox.style.display = "block";
   }
 }

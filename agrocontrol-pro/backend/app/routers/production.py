@@ -6,7 +6,7 @@ actividades diarias y cosechas.
 """
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -22,13 +22,14 @@ router = APIRouter(prefix="/api/produccion", tags=["Producción Agrícola"])
 @router.get("/ciclos", response_model=List[schemas.CicloProductivoOut])
 def listar_ciclos(
     estado: Optional[models.EstadoCiclo] = None,
+    limite: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
     query = db.query(models.CicloProductivo)
     if estado:
         query = query.filter(models.CicloProductivo.estado == estado)
-    return query.order_by(models.CicloProductivo.fecha_inicio.desc()).all()
+    return query.order_by(models.CicloProductivo.fecha_inicio.desc()).limit(limite).all()
 
 
 @router.post("/ciclos", response_model=schemas.CicloProductivoOut, status_code=status.HTTP_201_CREATED)
@@ -83,13 +84,14 @@ def cancelar_ciclo(
 @router.get("/actividades", response_model=List[schemas.ActividadDiariaOut])
 def listar_actividades(
     ciclo_id: Optional[int] = None,
+    limite: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
     query = db.query(models.ActividadDiaria)
     if ciclo_id:
         query = query.filter(models.ActividadDiaria.ciclo_id == ciclo_id)
-    return query.order_by(models.ActividadDiaria.fecha.desc()).all()
+    return query.order_by(models.ActividadDiaria.fecha.desc()).limit(limite).all()
 
 
 @router.post(
@@ -121,13 +123,14 @@ def crear_actividad(
 @router.get("/cosechas", response_model=List[schemas.CosechaOut])
 def listar_cosechas(
     ciclo_id: Optional[int] = None,
+    limite: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
     query = db.query(models.Cosecha)
     if ciclo_id:
         query = query.filter(models.Cosecha.ciclo_id == ciclo_id)
-    return query.order_by(models.Cosecha.fecha.desc()).all()
+    return query.order_by(models.Cosecha.fecha.desc()).limit(limite).all()
 
 
 @router.post("/cosechas", response_model=schemas.CosechaOut, status_code=status.HTTP_201_CREATED)

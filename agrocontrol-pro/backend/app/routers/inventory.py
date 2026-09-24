@@ -18,6 +18,20 @@ from app.auth import get_current_user
 router = APIRouter(prefix="/api/inventario", tags=["Inventario y Bodegas"])
 
 
+def _validar_finca_activa(db: Session, finca_id: Optional[int]) -> None:
+    if finca_id is None:
+        return
+    if not db.query(models.Finca).filter(models.Finca.id == finca_id, models.Finca.activo.is_(True)).first():
+        raise HTTPException(status_code=400, detail="La finca indicada no existe o está inactiva.")
+
+
+def _validar_proveedor(db: Session, proveedor_id: Optional[int]) -> None:
+    if proveedor_id is None:
+        return
+    if not db.get(models.Proveedor, proveedor_id):
+        raise HTTPException(status_code=400, detail="El proveedor indicado no existe.")
+
+
 # ---------------------------------------------------------------------------
 # BODEGAS
 # ---------------------------------------------------------------------------
@@ -70,7 +84,10 @@ def actualizar_bodega(
     bodega = db.query(models.Bodega).filter(models.Bodega.id == bodega_id).first()
     if not bodega:
         raise HTTPException(status_code=404, detail="Bodega no encontrada")
-    for campo, valor in payload.model_dump(exclude_unset=True).items():
+    cambios = payload.model_dump(exclude_unset=True)
+    if cambios.get("finca_id") is not None:
+        _validar_finca_activa(db, cambios["finca_id"])
+    for campo, valor in cambios.items():
         setattr(bodega, campo, valor)
     db.commit()
     db.refresh(bodega)
@@ -114,6 +131,7 @@ def crear_producto(
     existente = db.query(models.Producto).filter(models.Producto.codigo == payload.codigo).first()
     if existente:
         raise HTTPException(status_code=409, detail="Ya existe un producto con ese código")
+    _validar_proveedor(db, payload.proveedor_id)
     producto = models.Producto(**payload.model_dump())
     db.add(producto)
     db.commit()
@@ -131,7 +149,9 @@ def actualizar_producto(
     producto = db.query(models.Producto).filter(models.Producto.id == producto_id).first()
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
-    for campo, valor in payload.model_dump(exclude_unset=True).items():
+    cambios = payload.model_dump(exclude_unset=True)
+    _validar_proveedor(db, cambios.get("proveedor_id"))
+    for campo, valor in cambios.items():
         setattr(producto, campo, valor)
     db.commit()
     db.refresh(producto)
@@ -155,8 +175,21 @@ def eliminar_producto(
 # ---------------------------------------------------------------------------
 def _generar_alerta_si_critico(db: Session, producto: models.Producto) -> None:
     if producto.en_stock_critico:
+        titulo = f"Stock crítico: {producto.nombre}"
+        # Evita inundar la tabla de alertas: una sola alerta abierta por producto.
+        ya_abierta = (
+            db.query(models.Alerta.id)
+            .filter(
+                models.Alerta.modulo == "inventario",
+                models.Alerta.titulo == titulo,
+                models.Alerta.resuelta.is_(False),
+            )
+            .first()
+        )
+        if ya_abierta:
+            return
         alerta = models.Alerta(
-            titulo=f"Stock crítico: {producto.nombre}",
+            titulo=titulo,
             mensaje=(
                 f"El producto '{producto.nombre}' ({producto.codigo}) tiene "
                 f"{producto.stock_actual} {producto.unidad_medida} en stock, "
@@ -195,13 +228,24 @@ def crear_movimiento(
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
-    producto = db.query(models.Producto).filter(models.Producto.id == payload.producto_id).first()
+    # with_for_update bloquea la fila del producto hasta el commit: evita que dos
+    # salidas simultáneas lean el mismo stock y lo dejen en negativo.
+    producto = (
+        db.query(models.Producto)
+        .filter(models.Producto.id == payload.producto_id)
+        .with_for_update()
+        .first()
+    )
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
+    if not producto.activo:
+        raise HTTPException(status_code=400, detail="El producto está inactivo")
 
     bodega = db.query(models.Bodega).filter(models.Bodega.id == payload.bodega_id).first()
     if not bodega:
         raise HTTPException(status_code=404, detail="Bodega no encontrada")
+    if not bodega.activo:
+        raise HTTPException(status_code=400, detail="La bodega está inactiva")
 
     if payload.tipo == models.TipoMovimiento.SALIDA and payload.cantidad > producto.stock_actual:
         raise HTTPException(

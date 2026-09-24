@@ -1,4 +1,5 @@
-version: "3.9"
+# Las variables se leen del archivo .env de la raíz del proyecto.
+# Si falta alguna obligatoria, Docker se detiene y avisa cuál es.
 
 services:
   db:
@@ -8,11 +9,11 @@ services:
 
     environment:
       POSTGRES_USER: agrocontrol
-      POSTGRES_PASSWORD: agrocontrol_secret
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en el archivo .env}"
       POSTGRES_DB: agrocontrol_pro
 
-    ports:
-      - "5432:5432"
+    # Sin "ports": la base de datos NO se expone fuera de Docker.
+    # Solo el backend puede llegar a ella, por la red interna.
 
     volumes:
       - agrocontrol_pg_data:/var/lib/postgresql/data
@@ -33,35 +34,46 @@ services:
     container_name: agrocontrol_backend
     restart: unless-stopped
 
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
     environment:
-      DATABASE_URL: postgresql+psycopg2://agrocontrol:agrocontrol_secret@db:5432/agrocontrol_pro
-      JWT_SECRET_KEY: cambia-esta-clave-en-produccion-agrocontrol-pro
-      JWT_ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: "480"
-      CORS_ORIGINS: "*"
+      ENVIRONMENT: "${ENVIRONMENT:-development}"
+      DATABASE_URL: "postgresql+psycopg2://agrocontrol:${POSTGRES_PASSWORD}@db:5432/agrocontrol_pro"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:?Falta JWT_SECRET_KEY en el archivo .env}"
+      JWT_ALGORITHM: "${JWT_ALGORITHM:-HS256}"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "${ACCESS_TOKEN_EXPIRE_MINUTES:-120}"
+      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:8080}"
+      ALLOW_REGISTRATION: "${ALLOW_REGISTRATION:-false}"
+      ALLOWED_EMAILS: "${ALLOWED_EMAILS:-}"
+      TRUST_PROXY_HEADERS: "${TRUST_PROXY_HEADERS:-false}"
       # Credenciales de Google Cloud OAuth 2.0 (definidas en el archivo .env
-      # de la raíz del proyecto; NUNCA se hardcodean aquí).
-      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
-      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      # de la raíz del proyecto; NUNCA se escriben aquí).
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
       GOOGLE_REDIRECT_URI: "${GOOGLE_REDIRECT_URI:-http://localhost:8000/api/auth/google/callback}"
       FRONTEND_URL: "${FRONTEND_URL:-http://localhost:8080}"
       COOKIE_SECURE: "${COOKIE_SECURE:-false}"
-      # Google reordena/expande los nombres de los "scopes" al responder
-      # (p.ej. "email" -> "https://www.googleapis.com/auth/userinfo.email").
-      # Esto es normal y no representa un problema de seguridad, pero la
-      # librería oauthlib es estricta por defecto y lo rechaza. Esta
-      # variable le indica que acepte esa diferencia de formato.
+      # Google expande los nombres de los "scopes" al responder (p.ej. "email"
+      # -> "https://www.googleapis.com/auth/userinfo.email"). Es normal, pero
+      # oauthlib lo rechaza por defecto; esta variable acepta esa diferencia.
       OAUTHLIB_RELAX_TOKEN_SCOPE: "1"
 
     depends_on:
       db:
         condition: service_healthy
 
+    # Solo accesible desde tu propia máquina (127.0.0.1). Para que otras
+    # personas entren, ponelo detrás de un proxy con HTTPS (ver informe).
     ports:
-      - "8000:8000"
+      - "${BIND_ADDRESS:-127.0.0.1}:8000:8000"
 
+    # SOLO DESARROLLO: monta el código local dentro del contenedor.
+    # Borrá estas dos líneas en producción para usar el código de la imagen.
     volumes:
-      - ./backend:/app
+      - ./backend:/app:ro
 
   frontend:
     image: nginx:1.27-alpine
@@ -72,7 +84,7 @@ services:
       - ./frontend:/usr/share/nginx/html:ro
 
     ports:
-      - "8080:80"
+      - "${BIND_ADDRESS:-127.0.0.1}:8080:80"
 
     depends_on:
       - backend

@@ -61,6 +61,7 @@ def reporte_movimientos(
     fecha_fin: Optional[date] = Query(None),
     producto_id: Optional[int] = None,
     bodega_id: Optional[int] = None,
+    limite: int = Query(5000, ge=1, le=20000),
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
@@ -75,7 +76,10 @@ def reporte_movimientos(
     if bodega_id:
         query = query.filter(models.MovimientoInventario.bodega_id == bodega_id)
 
-    movimientos = query.order_by(models.MovimientoInventario.fecha.desc()).all()
+    # Se pide uno de más para saber si el resultado quedó recortado.
+    movimientos = query.order_by(models.MovimientoInventario.fecha.desc()).limit(limite + 1).all()
+    truncado = len(movimientos) > limite
+    movimientos = movimientos[:limite]
 
     total_entradas = sum(m.cantidad for m in movimientos if m.tipo == models.TipoMovimiento.ENTRADA)
     total_salidas = sum(m.cantidad for m in movimientos if m.tipo == models.TipoMovimiento.SALIDA)
@@ -95,6 +99,7 @@ def reporte_movimientos(
     ]
 
     return {
+        "truncado": truncado,
         "total_movimientos": len(detalle),
         "total_entradas": total_entradas,
         "total_salidas": total_salidas,
@@ -109,6 +114,7 @@ def reporte_movimientos(
 def reporte_produccion(
     lote_id: Optional[int] = None,
     estado: Optional[models.EstadoCiclo] = None,
+    limite: int = Query(1000, ge=1, le=5000),
     db: Session = Depends(get_db),
     usuario_actual=Depends(get_current_user),
 ):
@@ -118,7 +124,7 @@ def reporte_produccion(
     if estado:
         query = query.filter(models.CicloProductivo.estado == estado)
 
-    ciclos = query.order_by(models.CicloProductivo.fecha_inicio.desc()).all()
+    ciclos = query.order_by(models.CicloProductivo.fecha_inicio.desc()).limit(limite).all()
 
     detalle = []
     for c in ciclos:

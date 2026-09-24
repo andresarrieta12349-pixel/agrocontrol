@@ -1,0 +1,9 @@
+# Evita copiar a la imagen datos reales y archivos sensibles
+*.db
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+venv/
+.git/

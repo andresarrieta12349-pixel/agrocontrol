@@ -2,15 +2,68 @@
 schemas.py
 ----------
 Esquemas Pydantic v2 utilizados para validación de entrada/salida.
+
+Toda entrada tiene límites de largo y de rango: sin ellos, un usuario (o un
+atacante) podría enviar textos gigantes, números negativos, NaN o infinitos
+que corrompen inventario/gastos o tumban el servidor.
 """
+import re
 from datetime import datetime, date
-from typing import Optional, List, Dict
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from typing import Annotated, Optional, List, Dict
+from pydantic import (
+    AfterValidator, BaseModel, ConfigDict, EmailStr, Field, StringConstraints,
+    field_validator,
+)
 
 from app.models import (
     RolUsuario, ProveedorAutenticacion, TipoMovimiento, EstadoCiclo,
     SeveridadAlerta, CategoriaGasto,
 )
+
+# ---------------------------------------------------------------------------
+# TIPOS REUTILIZABLES CON LÍMITES
+# ---------------------------------------------------------------------------
+Nombre = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)]
+NombreCorto = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+Texto255 = Annotated[str, StringConstraints(strip_whitespace=True, max_length=255)]
+Texto50 = Annotated[str, StringConstraints(strip_whitespace=True, max_length=50)]
+TextoLargo = Annotated[str, StringConstraints(max_length=2000)]
+NoNegativo = Annotated[float, Field(ge=0, le=1e12, allow_inf_nan=False)]
+Positivo = Annotated[float, Field(gt=0, le=1e12, allow_inf_nan=False)]
+Horas = Annotated[float, Field(ge=0, le=24, allow_inf_nan=False)]
+Telefono = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^[0-9+()\-\s]{5,30}$")]
+# Sin "@" para que un nombre de usuario nunca pueda confundirse con un correo
+# (el login acepta ambos en el mismo campo).
+def _validar_nombre_usuario(valor: str) -> str:
+    # Se valida en código (y no con una regex con "lookahead") porque el motor de
+    # expresiones regulares de Pydantic v2 no soporta ese tipo de patrones.
+    if not re.fullmatch(r"[A-Za-z0-9_.\-]{3,100}", valor):
+        raise ValueError("El nombre de usuario debe tener entre 3 y 100 caracteres: letras, números, punto, guion o guion bajo.")
+    if not re.search(r"[A-Za-z]", valor):
+        raise ValueError("El nombre de usuario debe incluir al menos una letra.")
+    return valor
+
+
+NombreUsuario = Annotated[
+    str, StringConstraints(strip_whitespace=True), AfterValidator(_validar_nombre_usuario)
+]
+
+_CONTRASENAS_COMUNES = {
+    "12345678", "123456789", "1234567890", "password", "password1", "contraseña",
+    "qwertyui", "qwerty123", "11111111", "abc12345", "agrocontrol", "admin123",
+}
+
+
+def _validar_password(valor: str) -> str:
+    # bcrypt sólo procesa los primeros 72 bytes: se rechaza en lugar de truncar en silencio.
+    if len(valor.encode("utf-8")) > 72:
+        raise ValueError("La contraseña no puede superar los 72 caracteres.")
+    if valor.strip().lower() in _CONTRASENAS_COMUNES:
+        raise ValueError("Esa contraseña es demasiado común. Elige una más difícil de adivinar.")
+    return valor
+
+
+Password = Annotated[str, Field(min_length=8, max_length=72), AfterValidator(_validar_password)]
 
 
 # ---------------------------------------------------------------------------
@@ -18,9 +71,11 @@ from app.models import (
 # ---------------------------------------------------------------------------
 class LoginRequest(BaseModel):
     identificador: str = Field(
-        ..., description="Correo, teléfono o nombre de usuario", examples=["operador@agrocontrolpro.com"]
+        ..., min_length=1, max_length=150,
+        description="Correo, teléfono o nombre de usuario", examples=["operador@agrocontrolpro.com"],
     )
-    password: str = Field(..., examples=["••••••••"])
+    # Sin regla de fortaleza: las cuentas existentes deben poder entrar.
+    password: str = Field(..., min_length=1, max_length=128)
 
 
 class TokenResponse(BaseModel):
@@ -39,24 +94,32 @@ class UsuarioBase(BaseModel):
 
 
 class UsuarioCreate(UsuarioBase):
-    password: str = Field(..., min_length=4)
+    nombre_completo: Nombre
+    nombre_usuario: NombreUsuario
+    telefono: Optional[Telefono] = None
+    password: Password
 
 
 class UsuarioRegister(BaseModel):
-    nombre_completo: str = Field(..., min_length=2, max_length=150)
-    nombre_usuario: str = Field(..., min_length=3, max_length=100)
+    nombre_completo: Nombre
+    nombre_usuario: NombreUsuario
     correo: EmailStr
-    telefono: Optional[str] = None
-    password: str = Field(..., min_length=8)
+    telefono: Optional[Telefono] = None
+    password: Password
+
+    @field_validator("correo")
+    @classmethod
+    def _correo_en_minusculas(cls, valor):
+        return valor.lower() if valor else valor
 
 
 class UsuarioUpdate(BaseModel):
-    nombre_completo: Optional[str] = None
+    nombre_completo: Optional[Nombre] = None
     correo: Optional[EmailStr] = None
-    telefono: Optional[str] = None
+    telefono: Optional[Telefono] = None
     rol: Optional[RolUsuario] = None
     activo: Optional[bool] = None
-    password: Optional[str] = Field(None, min_length=4)
+    password: Optional[Password] = None
 
 
 class UsuarioOut(UsuarioBase):
@@ -71,10 +134,10 @@ class UsuarioOut(UsuarioBase):
 # ADMINISTRACIÓN: FINCAS, LOTES, PROVEEDORES, POTREROS, PASTOS
 # ---------------------------------------------------------------------------
 class FincaBase(BaseModel):
-    nombre: str
-    ubicacion: Optional[str] = None
-    area_hectareas: float = 0.0
-    responsable: Optional[str] = None
+    nombre: Nombre
+    ubicacion: Optional[Texto255] = None
+    area_hectareas: NoNegativo = 0.0
+    responsable: Optional[Nombre] = None
 
 
 class FincaCreate(FincaBase):
@@ -82,10 +145,10 @@ class FincaCreate(FincaBase):
 
 
 class FincaUpdate(BaseModel):
-    nombre: Optional[str] = None
-    ubicacion: Optional[str] = None
-    area_hectareas: Optional[float] = None
-    responsable: Optional[str] = None
+    nombre: Optional[Nombre] = None
+    ubicacion: Optional[Texto255] = None
+    area_hectareas: Optional[NoNegativo] = None
+    responsable: Optional[Nombre] = None
     activo: Optional[bool] = None
 
 
@@ -98,9 +161,9 @@ class FincaOut(FincaBase):
 
 class LoteBase(BaseModel):
     finca_id: int
-    nombre: str
-    area_hectareas: float = 0.0
-    tipo_cultivo: Optional[str] = None
+    nombre: NombreCorto
+    area_hectareas: NoNegativo = 0.0
+    tipo_cultivo: Optional[NombreCorto] = None
 
 
 class LoteCreate(LoteBase):
@@ -108,9 +171,9 @@ class LoteCreate(LoteBase):
 
 
 class LoteUpdate(BaseModel):
-    nombre: Optional[str] = None
-    area_hectareas: Optional[float] = None
-    tipo_cultivo: Optional[str] = None
+    nombre: Optional[NombreCorto] = None
+    area_hectareas: Optional[NoNegativo] = None
+    tipo_cultivo: Optional[NombreCorto] = None
     activo: Optional[bool] = None
 
 
@@ -122,9 +185,9 @@ class LoteOut(LoteBase):
 
 class PotreroBase(BaseModel):
     lote_id: int
-    nombre: str = Field(..., min_length=1, max_length=100)
-    capacidad_animales: int = Field(0, ge=0)
-    tipo_pasto: Optional[str] = None
+    nombre: NombreCorto
+    capacidad_animales: int = Field(0, ge=0, le=100000)
+    tipo_pasto: Optional[NombreCorto] = None
 
 
 class PotreroCreate(PotreroBase):
@@ -133,9 +196,9 @@ class PotreroCreate(PotreroBase):
 
 class PotreroUpdate(BaseModel):
     lote_id: Optional[int] = None
-    nombre: Optional[str] = Field(None, min_length=1, max_length=100)
-    capacidad_animales: Optional[int] = Field(None, ge=0)
-    tipo_pasto: Optional[str] = None
+    nombre: Optional[NombreCorto] = None
+    capacidad_animales: Optional[int] = Field(None, ge=0, le=100000)
+    tipo_pasto: Optional[NombreCorto] = None
     activo: Optional[bool] = None
 
 
@@ -147,8 +210,8 @@ class PotreroOut(PotreroBase):
 
 
 class PastoBase(BaseModel):
-    nombre: str = Field(..., min_length=1, max_length=100)
-    descripcion: Optional[str] = None
+    nombre: NombreCorto
+    descripcion: Optional[Texto255] = None
 
 
 class PastoCreate(PastoBase):
@@ -156,8 +219,8 @@ class PastoCreate(PastoBase):
 
 
 class PastoUpdate(BaseModel):
-    nombre: Optional[str] = Field(None, min_length=1, max_length=100)
-    descripcion: Optional[str] = None
+    nombre: Optional[NombreCorto] = None
+    descripcion: Optional[Texto255] = None
     activo: Optional[bool] = None
 
 
@@ -169,9 +232,9 @@ class PastoOut(PastoBase):
 
 
 class AnimalBase(BaseModel):
-    arete: str = Field(..., min_length=1, max_length=50)
-    peso_kg: float = Field(..., gt=0)
-    estado_salud: str = Field("saludable", min_length=2, max_length=50)
+    arete: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+    peso_kg: Annotated[float, Field(gt=0, le=5000, allow_inf_nan=False)]
+    estado_salud: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=50)] = "saludable"
     potrero_id: int
 
 
@@ -180,9 +243,9 @@ class AnimalCreate(AnimalBase):
 
 
 class AnimalUpdate(BaseModel):
-    arete: Optional[str] = Field(None, min_length=1, max_length=50)
-    peso_kg: Optional[float] = Field(None, gt=0)
-    estado_salud: Optional[str] = Field(None, min_length=2, max_length=50)
+    arete: Optional[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]] = None
+    peso_kg: Optional[Annotated[float, Field(gt=0, le=5000, allow_inf_nan=False)]] = None
+    estado_salud: Optional[Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=50)]] = None
     potrero_id: Optional[int] = None
     activo: Optional[bool] = None
 
@@ -195,12 +258,12 @@ class AnimalOut(AnimalBase):
 
 
 class ProveedorBase(BaseModel):
-    nombre: str
-    nit: Optional[str] = None
-    contacto: Optional[str] = None
-    telefono: Optional[str] = None
+    nombre: Nombre
+    nit: Optional[Texto50] = None
+    contacto: Optional[Nombre] = None
+    telefono: Optional[Texto50] = None
     correo: Optional[EmailStr] = None
-    direccion: Optional[str] = None
+    direccion: Optional[Texto255] = None
 
 
 class ProveedorCreate(ProveedorBase):
@@ -208,12 +271,12 @@ class ProveedorCreate(ProveedorBase):
 
 
 class ProveedorUpdate(BaseModel):
-    nombre: Optional[str] = None
-    nit: Optional[str] = None
-    contacto: Optional[str] = None
-    telefono: Optional[str] = None
+    nombre: Optional[Nombre] = None
+    nit: Optional[Texto50] = None
+    contacto: Optional[Nombre] = None
+    telefono: Optional[Texto50] = None
     correo: Optional[EmailStr] = None
-    direccion: Optional[str] = None
+    direccion: Optional[Texto255] = None
     activo: Optional[bool] = None
 
 
@@ -228,8 +291,8 @@ class ProveedorOut(ProveedorBase):
 # INVENTARIO: BODEGAS, PRODUCTOS, MOVIMIENTOS
 # ---------------------------------------------------------------------------
 class BodegaBase(BaseModel):
-    nombre: str
-    ubicacion: Optional[str] = None
+    nombre: Nombre
+    ubicacion: Optional[Texto255] = None
     finca_id: Optional[int] = None
 
 
@@ -240,8 +303,8 @@ class BodegaCreate(BodegaBase):
 
 
 class BodegaUpdate(BaseModel):
-    nombre: Optional[str] = None
-    ubicacion: Optional[str] = None
+    nombre: Optional[Nombre] = None
+    ubicacion: Optional[Texto255] = None
     finca_id: Optional[int] = None
     activo: Optional[bool] = None
 
@@ -253,25 +316,25 @@ class BodegaOut(BodegaBase):
 
 
 class ProductoBase(BaseModel):
-    codigo: str
-    nombre: str
-    categoria: Optional[str] = None
-    unidad_medida: str = "unidad"
-    stock_minimo: float = 0.0
-    precio_unitario: float = 0.0
+    codigo: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+    nombre: Nombre
+    categoria: Optional[NombreCorto] = None
+    unidad_medida: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=30)] = "unidad"
+    stock_minimo: NoNegativo = 0.0
+    precio_unitario: NoNegativo = 0.0
     proveedor_id: Optional[int] = None
 
 
 class ProductoCreate(ProductoBase):
-    stock_actual: float = 0.0
+    stock_actual: NoNegativo = 0.0
 
 
 class ProductoUpdate(BaseModel):
-    nombre: Optional[str] = None
-    categoria: Optional[str] = None
-    unidad_medida: Optional[str] = None
-    stock_minimo: Optional[float] = None
-    precio_unitario: Optional[float] = None
+    nombre: Optional[Nombre] = None
+    categoria: Optional[NombreCorto] = None
+    unidad_medida: Optional[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=30)]] = None
+    stock_minimo: Optional[NoNegativo] = None
+    precio_unitario: Optional[NoNegativo] = None
     proveedor_id: Optional[int] = None
     activo: Optional[bool] = None
 
@@ -289,10 +352,10 @@ class MovimientoInventarioBase(BaseModel):
     producto_id: int
     bodega_id: int
     tipo: TipoMovimiento
-    cantidad: float = Field(..., gt=0)
-    costo_unitario: float = 0.0
-    referencia: Optional[str] = None
-    observaciones: Optional[str] = None
+    cantidad: Positivo
+    costo_unitario: NoNegativo = 0.0
+    referencia: Optional[Texto255] = None
+    observaciones: Optional[TextoLargo] = None
 
 
 class MovimientoInventarioCreate(MovimientoInventarioBase):
@@ -311,11 +374,11 @@ class MovimientoInventarioOut(MovimientoInventarioBase):
 # ---------------------------------------------------------------------------
 class CicloProductivoBase(BaseModel):
     lote_id: int
-    nombre: str
-    cultivo: str
+    nombre: Nombre
+    cultivo: NombreCorto
     fecha_inicio: date
     fecha_estimada_cosecha: Optional[date] = None
-    rendimiento_esperado_kg: float = 0.0
+    rendimiento_esperado_kg: NoNegativo = 0.0
 
 
 class CicloProductivoCreate(CicloProductivoBase):
@@ -323,12 +386,12 @@ class CicloProductivoCreate(CicloProductivoBase):
 
 
 class CicloProductivoUpdate(BaseModel):
-    nombre: Optional[str] = None
-    cultivo: Optional[str] = None
+    nombre: Optional[Nombre] = None
+    cultivo: Optional[NombreCorto] = None
     fecha_estimada_cosecha: Optional[date] = None
     fecha_fin_real: Optional[date] = None
     estado: Optional[EstadoCiclo] = None
-    rendimiento_esperado_kg: Optional[float] = None
+    rendimiento_esperado_kg: Optional[NoNegativo] = None
 
 
 class CicloProductivoOut(CicloProductivoBase):
@@ -342,11 +405,11 @@ class CicloProductivoOut(CicloProductivoBase):
 class ActividadDiariaBase(BaseModel):
     ciclo_id: int
     fecha: date
-    tipo_actividad: str
-    descripcion: Optional[str] = None
-    responsable: Optional[str] = None
-    horas_trabajo: float = 0.0
-    insumos_utilizados: Optional[str] = None
+    tipo_actividad: NombreCorto
+    descripcion: Optional[TextoLargo] = None
+    responsable: Optional[Nombre] = None
+    horas_trabajo: Horas = 0.0
+    insumos_utilizados: Optional[Texto255] = None
 
 
 class ActividadDiariaCreate(ActividadDiariaBase):
@@ -361,9 +424,9 @@ class ActividadDiariaOut(ActividadDiariaBase):
 class CosechaBase(BaseModel):
     ciclo_id: int
     fecha: date
-    cantidad_kg: float = Field(..., gt=0)
-    calidad: Optional[str] = None
-    observaciones: Optional[str] = None
+    cantidad_kg: Positivo
+    calidad: Optional[Texto50] = None
+    observaciones: Optional[TextoLargo] = None
 
 
 class CosechaCreate(CosechaBase):
@@ -380,8 +443,8 @@ class CosechaOut(CosechaBase):
 # ---------------------------------------------------------------------------
 class GastoBase(BaseModel):
     categoria: CategoriaGasto
-    descripcion: str = Field(..., min_length=1, max_length=255)
-    monto: float = Field(..., gt=0)
+    descripcion: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+    monto: Positivo
     fecha: date
     finca_id: Optional[int] = None
 
@@ -392,8 +455,8 @@ class GastoCreate(GastoBase):
 
 class GastoUpdate(BaseModel):
     categoria: Optional[CategoriaGasto] = None
-    descripcion: Optional[str] = Field(None, min_length=1, max_length=255)
-    monto: Optional[float] = Field(None, gt=0)
+    descripcion: Optional[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]] = None
+    monto: Optional[Positivo] = None
     fecha: Optional[date] = None
     finca_id: Optional[int] = None
 
