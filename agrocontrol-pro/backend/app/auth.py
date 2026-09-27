@@ -22,6 +22,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+from dotenv import load_dotenv
+
+# Cargar las variables del archivo .env antes de leer JWT_SECRET_KEY
+load_dotenv()
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -48,14 +53,21 @@ _SECRETOS_CONOCIDOS = {
 
 def _cargar_secreto_jwt() -> str:
     secreto = os.getenv("JWT_SECRET_KEY", "").strip()
-    es_debil = (not secreto) or secreto.lower() in _SECRETOS_CONOCIDOS or len(secreto) < 32
+    es_debil = (
+        (not secreto)
+        or secreto.lower() in _SECRETOS_CONOCIDOS
+        or len(secreto) < 32
+    )
+
     if not es_debil:
         return secreto
+
     if ES_PRODUCCION:
         raise RuntimeError(
             "JWT_SECRET_KEY falta o es débil. Genera una con: "
             "python -c \"import secrets; print(secrets.token_urlsafe(64))\""
         )
+
     logger.warning(
         "JWT_SECRET_KEY no definida o débil: se usa una clave aleatoria temporal "
         "(las sesiones se cerrarán al reiniciar). Define una clave fuerte en .env."
@@ -65,13 +77,20 @@ def _cargar_secreto_jwt() -> str:
 
 JWT_SECRET_KEY = _cargar_secreto_jwt()
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256").strip()
+
 if JWT_ALGORITHM not in {"HS256", "HS384", "HS512"}:
     raise RuntimeError("JWT_ALGORITHM debe ser HS256, HS384 o HS512.")
-# Vida corta = menos daño si un token se filtra (antes: 480 min = 8 horas).
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
+
+# Vida corta = menos daño si un token se filtra.
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120")
+)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="api/auth/login",
+    auto_error=False,
+)
 
 # Hash de mentira: se verifica cuando el usuario no existe, para que el login
 # tarde lo mismo exista o no la cuenta (evita descubrir correos registrados).
@@ -96,11 +115,23 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
 # ---------------------------------------------------------------------------
 # JWT
 # ---------------------------------------------------------------------------
-def create_access_token(data: dict, expires_minutes: int = ACCESS_TOKEN_EXPIRE_MINUTES) -> str:
+def create_access_token(
+    data: dict,
+    expires_minutes: int = ACCESS_TOKEN_EXPIRE_MINUTES,
+) -> str:
     to_encode = data.copy()
     ahora = datetime.now(timezone.utc)
-    to_encode.update({"exp": ahora + timedelta(minutes=expires_minutes), "iat": ahora})
-    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+    to_encode.update({
+        "exp": ahora + timedelta(minutes=expires_minutes),
+        "iat": ahora,
+    })
+
+    return jwt.encode(
+        to_encode,
+        JWT_SECRET_KEY,
+        algorithm=JWT_ALGORITHM,
+    )
 
 
 def decode_access_token(token: str) -> dict:
@@ -122,36 +153,61 @@ def decode_access_token(token: str) -> dict:
 # ---------------------------------------------------------------------------
 # Búsqueda de usuario por correo, teléfono o nombre de usuario
 # ---------------------------------------------------------------------------
-def obtener_usuario_por_identificador(db: Session, identificador: str) -> Optional[models.Usuario]:
+def obtener_usuario_por_identificador(
+    db: Session,
+    identificador: str,
+) -> Optional[models.Usuario]:
+
     # Comparación exacta (sin ILIKE): con ILIKE los caracteres "%" y "_" del
     # texto ingresado actuarían como comodines y podrían coincidir con otras cuentas.
     identificador_normalizado = identificador.strip().lower()
+
     return (
         db.query(models.Usuario)
         .filter(
             or_(
-                func.lower(models.Usuario.nombre_usuario) == identificador_normalizado,
-                func.lower(models.Usuario.correo) == identificador_normalizado,
-                models.Usuario.telefono == identificador.strip(),
+                func.lower(models.Usuario.nombre_usuario)
+                == identificador_normalizado,
+                func.lower(models.Usuario.correo)
+                == identificador_normalizado,
+                models.Usuario.telefono
+                == identificador.strip(),
             )
         )
         .first()
     )
 
 
-def autenticar_usuario(db: Session, identificador: str, password: str) -> Optional[models.Usuario]:
-    usuario = obtener_usuario_por_identificador(db, identificador)
+def autenticar_usuario(
+    db: Session,
+    identificador: str,
+    password: str,
+) -> Optional[models.Usuario]:
+
+    usuario = obtener_usuario_por_identificador(
+        db,
+        identificador,
+    )
+
     # Siempre se hace una verificación bcrypt (real o falsa) para igualar tiempos.
-    hash_a_verificar = usuario.password_hash if (usuario and usuario.password_hash) else _HASH_FALSO
-    password_ok = verify_password(password or "", hash_a_verificar)
+    hash_a_verificar = (
+        usuario.password_hash
+        if (usuario and usuario.password_hash)
+        else _HASH_FALSO
+    )
+
+    password_ok = verify_password(
+        password or "",
+        hash_a_verificar,
+    )
 
     if not usuario or not usuario.activo:
         return None
-    # Las cuentas creadas por Google no tienen password_hash: no se les asigna
-    # ninguna contraseña predeterminada, así que el login por contraseña
-    # siempre debe rechazarse para ellas.
+
+    # Las cuentas creadas por Google no tienen password_hash.
     if not usuario.password_hash or not password_ok:
         return None
+
     return usuario
 
 
@@ -159,37 +215,50 @@ def autenticar_usuario(db: Session, identificador: str, password: str) -> Option
 # Dependencia: usuario autenticado actual
 # ---------------------------------------------------------------------------
 def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
 ) -> models.Usuario:
+
     credenciales_invalidas = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No se pudieron validar las credenciales",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     if not token:
         raise credenciales_invalidas
 
     payload = decode_access_token(token)
+
     try:
         usuario_id = int(payload.get("sub"))
     except (TypeError, ValueError):
         raise credenciales_invalidas
 
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    usuario = (
+        db.query(models.Usuario)
+        .filter(models.Usuario.id == usuario_id)
+        .first()
+    )
+
     if usuario is None or not usuario.activo:
         raise credenciales_invalidas
+
     return usuario
 
 
 def requerir_rol(*roles_permitidos: models.RolUsuario):
     """Fábrica de dependencias para restringir endpoints por rol."""
 
-    def dependencia(usuario_actual: models.Usuario = Depends(get_current_user)):
+    def dependencia(
+        usuario_actual: models.Usuario = Depends(get_current_user),
+    ):
         if usuario_actual.rol not in roles_permitidos:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="No tiene permisos suficientes para esta operación",
             )
+
         return usuario_actual
 
     return dependencia
