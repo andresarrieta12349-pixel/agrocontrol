@@ -4,11 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AgroControl Pro | Plataforma de Gestión Agrícola</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- Fuentes y librerías externas -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- Aplica el tema guardado antes de pintar (evita parpadeo) -->
 <script>
-  // Aplica el tema guardado antes de pintar la página (evita parpadeo)
   (function(){
     try{
       const t = localStorage.getItem("agrocontrol_tema") || "claro";
@@ -16,7 +19,9 @@
     }catch(e){}
   })();
 </script>
-<link rel="stylesheet" href="css/variables.css" />
+
+<!-- Estilos (ruta absoluta) -->
+<link rel="stylesheet" href="/css/variables.css" />
 </head>
 <body>
 
@@ -81,21 +86,11 @@
             <div class="sub">Regístrate con tu correo y una contraseña segura.</div>
           </div>
           <form id="form-registro" class="form-login-dark">
-            <div class="campo">
-              <input id="registro-nombre" class="campo-input-dark" type="text" placeholder="Nombre completo" minlength="2" maxlength="150" required />
-            </div>
-            <div class="campo">
-              <input id="registro-usuario" class="campo-input-dark" type="text" placeholder="Nombre de usuario" minlength="3" maxlength="100" required />
-            </div>
-            <div class="campo">
-              <input id="registro-correo" class="campo-input-dark" type="email" placeholder="Correo electrónico" autocomplete="email" required />
-            </div>
-            <div class="campo">
-              <input id="registro-password" class="campo-input-dark" type="password" placeholder="Contraseña (8+ caracteres)" minlength="8" autocomplete="new-password" required />
-            </div>
-            <div class="campo">
-              <input id="registro-confirmacion" class="campo-input-dark" type="password" placeholder="Confirmar contraseña" minlength="8" autocomplete="new-password" required />
-            </div>
+            <div class="campo"><input id="registro-nombre" class="campo-input-dark" type="text" placeholder="Nombre completo" minlength="2" maxlength="150" required /></div>
+            <div class="campo"><input id="registro-usuario" class="campo-input-dark" type="text" placeholder="Nombre de usuario" minlength="3" maxlength="100" required /></div>
+            <div class="campo"><input id="registro-correo" class="campo-input-dark" type="email" placeholder="Correo electrónico" autocomplete="email" required /></div>
+            <div class="campo"><input id="registro-password" class="campo-input-dark" type="password" placeholder="Contraseña (8+ caracteres)" minlength="8" autocomplete="new-password" required /></div>
+            <div class="campo"><input id="registro-confirmacion" class="campo-input-dark" type="password" placeholder="Confirmar contraseña" minlength="8" autocomplete="new-password" required /></div>
             <button type="submit" class="btn-continuar-blanco">Registrarse</button>
           </form>
           <div class="error-login" id="error-registro"></div>
@@ -112,7 +107,7 @@
      ========================================================================== -->
 <div id="app">
 
-  <!-- Botón de configuración (esquina superior derecha) -->
+  <!-- Botón de configuración -->
   <div class="barra-superior-derecha" id="barra-superior-derecha">
     <button class="btn-config" id="btn-abrir-configuracion" type="button" title="Configuración" aria-haspopup="dialog" onclick="abrirModalConfiguracion()">
       <svg class="icono-svg" viewBox="0 0 24 24">
@@ -474,9 +469,7 @@
         </p>
         <div class="campo">
           <label>Finca</label>
-          <select id="reporte-finca">
-            <option value="">Todas las fincas</option>
-          </select>
+          <select id="reporte-finca"><option value="">Todas las fincas</option></select>
         </div>
       </div>
 
@@ -519,11 +512,11 @@
       </div>
     </section>
 
-    <!-- ===================== MANUAL DE USUARIO (NUEVO) ===================== -->
+    <!-- ===================== MANUAL DE USUARIO ===================== -->
     <section class="seccion" id="seccion-manual">
       <div class="topbar">
         <div><div class="eyebrow">Ayuda</div><h1>Manual de usuario</h1></div>
-        <a class="btn-secundario" href="manual.html" target="_blank" rel="noopener" style="text-decoration:none;">
+        <a class="btn-secundario" href="/manual.html" target="_blank" rel="noopener" style="text-decoration:none;">
           Abrir en pestaña nueva ↗
         </a>
       </div>
@@ -549,10 +542,14 @@
 <!-- ==========================================================================
      4. SCRIPTS EXTERNOS (vistas y componentes)
      ========================================================================== -->
-<script src="js/theme.js"></script>
-<script src="js/views/inventory-view.js"></script>
-<script src="js/views/potreros-view.js"></script>
-<script src="js/components/inventory-table.js"></script>
+<!-- URL del backend (Railway). Debe ir antes del script principal -->
+<script>
+  window.AGROCONTROL_API_BASE = "https://agrocontrol-production-dfd3.up.railway.app";
+</script>
+<script src="/js/theme.js"></script>
+<script src="/js/views/inventory-view.js"></script>
+<script src="/js/views/potreros-view.js"></script>
+<script src="/js/components/inventory-table.js"></script>
 
 <!-- ==========================================================================
      5. SCRIPT PRINCIPAL
@@ -724,7 +721,6 @@ if (typeof window.toggleTheme !== "function"){
 /* ==========================================================================
    D. AUTENTICACIÓN
    ========================================================================== */
-
 /* --- D1. Validación de campos del registro --- */
 function configurarValidacionAutenticacion(){
   const correoRegistro = document.getElementById("registro-correo");
@@ -951,7 +947,6 @@ function renderGraficoGastos(fuente, esEjemplo){
   const items = CATEGORIAS_GASTO.map(c => Object.assign({}, c, {valor: acum[c.clave]}));
   const total = items.reduce((suma, it) => suma + it.valor, 0);
 
-  // Si los datos son iguales a los que ya se ven, no se redibuja (evita parpadeos al actualizar solo)
   const firma = JSON.stringify([acum, esEjemplo]);
   if (total > 0 && estadoGastos && !estadoGastos.vacio && estadoGastos.firma === firma
       && document.querySelector("#gastos-cuerpo .donut-caja")) return;
@@ -1182,7 +1177,6 @@ function renderGraficoKardex(r, forzar){
   if (!forzar && graficoKardex && firmaKardex === firma) return;
   firmaKardex = firma;
 
-  // Colores desde los tokens CSS: cambian solos con el modo claro/oscuro
   const colorEntradas = leerTokenCss("--chart-entradas", "#16a97a");
   const colorSalidas  = leerTokenCss("--chart-salidas", "#d99420");
   const colorTexto    = leerTokenCss("--text-muted", "#5c6570");
@@ -1676,7 +1670,7 @@ function actualizarChipOrganizacion(){
 }
 
 /* ==========================================================================
-   L. FINCA ACTIVA (selector + validación estricta para bodegas)
+   L. FINCA ACTIVA
    ========================================================================== */
 function renderSelectoresFinca(){
   const fincasActivas = (cacheFincas || []).filter(f => f.activo);
@@ -1728,7 +1722,7 @@ function intentarAbrirModalBodega(){
 window.intentarAbrirModalBodega = intentarAbrirModalBodega;
 
 /* ==========================================================================
-   M. MODAL DE CONFIGURACIÓN (esquina superior derecha)
+   M. MODAL DE CONFIGURACIÓN
    ========================================================================== */
 function abrirModalConfiguracion(){
   const cont = document.getElementById("modal-contenido");
@@ -1864,18 +1858,17 @@ window.descargarReporteCosechas = descargarReporteCosechas;
 
 /* ==========================================================================
    Ñ. MÓDULO: MANUAL DE USUARIO
-   El manual vive en "manual.html" y se muestra dentro de un iframe para no
-   perder el menú lateral. Se carga la primera vez que entras a la sección.
    ========================================================================== */
 function temaActualApp(){
   return document.documentElement.getAttribute("data-theme") || "claro";
 }
 
+// Se carga la primera vez que entras a la sección.
 function cargarManual(){
   const marco = document.getElementById("iframe-manual");
   if (!marco) return;
   if (!marco.getAttribute("src")){
-    marco.setAttribute("src", "manual.html?tema=" + encodeURIComponent(temaActualApp()));
+    marco.setAttribute("src", "/manual.html?tema=" + encodeURIComponent(temaActualApp()));
   }
 }
 window.cargarManual = cargarManual;
@@ -1884,7 +1877,7 @@ window.cargarManual = cargarManual;
 function sincronizarTemaManual(){
   const marco = document.getElementById("iframe-manual");
   if (!marco || !marco.getAttribute("src")) return;
-  marco.setAttribute("src", "manual.html?tema=" + encodeURIComponent(temaActualApp()));
+  marco.setAttribute("src", "/manual.html?tema=" + encodeURIComponent(temaActualApp()));
 }
 
 /* ==========================================================================
@@ -2072,8 +2065,7 @@ function cerrarModal(){
 }
 
 /* ==========================================================================
-   P. ARRANQUE: procesa el regreso de Google (si aplica) y luego decide si
-   entra directo a la app con una sesión ya guardada.
+   P. ARRANQUE: procesa el regreso de Google y decide si entra a la app
    ========================================================================== */
 async function procesarRegresoDeGoogle() {
   const fragmento = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -2126,5 +2118,6 @@ function mostrarErrorDeGoogleSiExiste() {
   if (TOKEN && USUARIO) iniciarApp();
 })();
 </script>
+
 </body>
 </html>
