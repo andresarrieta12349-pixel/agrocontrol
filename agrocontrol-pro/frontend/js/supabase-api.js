@@ -16,11 +16,18 @@
   /* ----------------------------------------------------------------------
      1. Cliente de Supabase y sesión
      ---------------------------------------------------------------------- */
-  // Si Google nos devuelve a la página con los tokens en la URL (#access_token=...),
-  // los leemos ahora mismo, antes de que el script principal limpie la URL.
+  // Si Google (o el correo de recuperación) nos devuelve a la página con los
+  // tokens en la URL (#access_token=...), los leemos ahora mismo.
   const hashParams = new URLSearchParams(location.hash.replace(/^#/, ""));
   const tokenHash = hashParams.get("access_token");
   const refreshHash = hashParams.get("refresh_token");
+  const esRecuperacion = hashParams.get("type") === "recovery";
+
+  // Si viene del correo de recuperar contraseña, limpiamos la URL de inmediato
+  // para que el script principal NO lo trate como un inicio de sesión normal.
+  if (esRecuperacion) {
+    history.replaceState(null, "", location.pathname + location.search);
+  }
 
   const db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
@@ -33,7 +40,7 @@
         await db.auth.setSession({ access_token: tokenHash, refresh_token: refreshHash });
       }
     } catch (e) {
-      console.error("[AgroControl] No se pudo restaurar la sesión de Google:", e);
+      console.error("[AgroControl] No se pudo restaurar la sesión:", e);
     }
     const { data } = await db.auth.getSession();
     return data.session;
@@ -455,4 +462,51 @@
       mostrarToast(err.message, true);
     }
   };
+
+  /* ----------------------------------------------------------------------
+     9. Recuperar contraseña
+     ---------------------------------------------------------------------- */
+  document.getElementById("olvide-password")?.addEventListener("click", async () => {
+    const caja = document.getElementById("error-login");
+    const correo = document.getElementById("login-correo").value.trim().toLowerCase();
+    caja.style.display = "block";
+    if (!correo) {
+      caja.textContent = "Escribe tu correo arriba y vuelve a hacer clic aquí.";
+      return;
+    }
+    const { error } = await db.auth.resetPasswordForEmail(correo, { redirectTo: location.origin + "/" });
+    caja.textContent = error
+      ? "No se pudo enviar el correo: " + error.message
+      : "Si el correo existe, te enviamos un enlace para crear una nueva contraseña.";
+  });
+
+  // Cuando la persona vuelve desde el correo, mostramos el formulario de nueva contraseña
+  if (esRecuperacion) {
+    sesionLista.then(() => {
+      document.getElementById("modal-contenido").innerHTML = `
+        <h3>Crea tu nueva contraseña</h3>
+        <form id="form-nueva-password" autocomplete="off">
+          <div class="campo"><label>Nueva contraseña</label>
+            <input type="password" id="nueva-password" minlength="8" required /></div>
+          <div class="campo"><label>Confirmar contraseña</label>
+            <input type="password" id="nueva-password2" minlength="8" required /></div>
+          <div class="modal-acciones">
+            <button type="submit" class="btn-primario">Guardar contraseña</button>
+          </div>
+        </form>`;
+      document.getElementById("modal-fondo").classList.add("activo");
+      document.getElementById("form-nueva-password").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const p1 = document.getElementById("nueva-password").value;
+        const p2 = document.getElementById("nueva-password2").value;
+        if (p1 !== p2) return mostrarToast("Las contraseñas no coinciden.", true);
+        if (!esPasswordSegura(p1)) return mostrarToast("Usa 8+ caracteres con mayúscula, minúscula y número.", true);
+        const { error } = await db.auth.updateUser({ password: p1 });
+        if (error) return mostrarToast(error.message, true);
+        await db.auth.signOut();
+        cerrarModal();
+        mostrarToast("Contraseña cambiada. Ya puedes iniciar sesión.");
+      });
+    });
+  }
 })();
