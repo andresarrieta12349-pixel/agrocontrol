@@ -61,7 +61,7 @@ cd agrocontrol-pro
 
 # 2. Construye y levanta todos los servicios (backend + PostgreSQL + frontend)
 docker compose up --build
-
+ 
 # 3. Accede a:
 #    - Frontend (Dashboard):  http://localhost:8080
 #    - API + Swagger UI:      http://localhost:8000/docs

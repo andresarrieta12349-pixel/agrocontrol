@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AgroControl Pro | Plataforma de Gestión Agrícola</title>
+
+<!-- Fuentes y librerías externas -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- Aplica el tema guardado antes de pintar (evita parpadeo) -->
+<script>
+  (function(){
+    try{
+      const t = localStorage.getItem("agrocontrol_tema") || "claro";
+      document.documentElement.setAttribute("data-theme", t);
+    }catch(e){}
+  })();
+</script>
+
+<!-- Estilos (ruta absoluta) -->
+<link rel="stylesheet" href="/css/variables.css" />
+</head>
+<body>
+
+<!-- ==========================================================================
+     1. PANTALLA DE LOGIN
+     ========================================================================== -->
+<div id="pantalla-login">
+
+  <!-- Panel izquierdo (marca) -->
+  <div class="login-lateral">
+    <div class="malla"></div>
+    <div class="brand">
+      <span class="brand-mark">AC</span> AgroControl Pro
+      <span class="badge-enterprise">Trazabilidad total</span>
+    </div>
+    <div>
+      <h1>Gestión agrícola integral para operaciones exigentes.</h1>
+      <p>Inventario, producción y administración de fincas en una sola plataforma B2B, con trazabilidad completa por ciclo, lote y bodega.</p>
+    </div>
+    <div class="kpi-preview">
+      <div class="kpi-chip"><div class="num">+120</div><div class="lab">Ciclos gestionados</div></div>
+      <div class="kpi-chip"><div class="num">98.4%</div><div class="lab">Disponibilidad</div></div>
+      <div class="kpi-chip"><div class="num">24/7</div><div class="lab">Monitoreo</div></div>
+    </div>
+  </div>
+
+  <!-- Panel derecho (autenticación) -->
+  <div class="login-formulario" id="contenedor-autenticacion">
+    <div class="caja-form">
+
+      <!-- Inicio de sesión: solo Google + enlace a registro -->
+      <div class="formulario-login">
+        <div class="modal-login-dark">
+          <button type="button" class="btn-close-modal" id="btn-cerrar-modal-login" title="Cerrar">&times;</button>
+
+          <div class="modal-login-header">
+            <h2>Iniciar sesión o registrarse</h2>
+          </div>
+
+          <div class="btn-oauth-group">
+            <button type="button" class="btn-oauth-dark" id="btn-google-login">
+              <svg viewBox="0 0 24 24" width="19" height="19">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.29v3.15C3.26 21.3 7.31 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.29C.47 8.21 0 10.05 0 12s.47 3.79 1.29 5.42l3.99-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              Continuar con Google
+            </button>
+          </div>
+
+          <div class="error-login" id="error-login"></div>
+          <button type="button" class="enlace-registro" id="mostrar-registro">¿No tienes cuenta? Regístrate</button>
+        </div>
+      </div>
+
+      <!-- Registro con correo y contraseña -->
+      <div class="formulario-registro">
+        <div class="modal-login-dark">
+          <div class="modal-login-header">
+            <h2>Crear una cuenta</h2>
+            <div class="sub">Regístrate con tu correo y una contraseña segura.</div>
+          </div>
+          <form id="form-registro" class="form-login-dark">
+            <div class="campo"><input id="registro-nombre" class="campo-input-dark" type="text" placeholder="Nombre completo" minlength="2" maxlength="150" required /></div>
+            <div class="campo"><input id="registro-usuario" class="campo-input-dark" type="text" placeholder="Nombre de usuario" minlength="3" maxlength="100" required /></div>
+            <div class="campo"><input id="registro-correo" class="campo-input-dark" type="email" placeholder="Correo electrónico" autocomplete="email" required /></div>
+            <div class="campo"><input id="registro-password" class="campo-input-dark" type="password" placeholder="Contraseña (8+ caracteres)" minlength="8" autocomplete="new-password" required /></div>
+            <div class="campo"><input id="registro-confirmacion" class="campo-input-dark" type="password" placeholder="Confirmar contraseña" minlength="8" autocomplete="new-password" required /></div>
+            <button type="submit" class="btn-continuar-blanco">Registrarse</button>
+          </form>
+          <div class="error-login" id="error-registro"></div>
+          <button type="button" class="enlace-registro" id="mostrar-login">Ya tengo una cuenta</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     2. APLICACIÓN PRINCIPAL
+     ========================================================================== -->
+<div id="app">
+
+  <!-- Botón de configuración -->
+  <div class="barra-superior-derecha" id="barra-superior-derecha">
+    <button class="btn-config" id="btn-abrir-configuracion" type="button" title="Configuración" aria-haspopup="dialog" onclick="abrirModalConfiguracion()">
+      <svg class="icono-svg" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Menú lateral -->
+  <aside>
+    <div class="brand"><span class="brand-mark">AC</span> AgroControl</div>
+    <div class="org-chip"><span class="punto-activo"></span> <span id="org-chip-nombre">Sin finca registrada</span></div>
+
+    <div class="menu-eyebrow">Operación</div>
+    <nav class="menu">
+      <button data-seccion="dashboard" class="activo">
+        <svg class="icono-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard <span class="dot"></span>
+      </button>
+      <button data-seccion="inventario">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        Inventario y Bodegas <span class="dot"></span>
+      </button>
+      <button data-seccion="potreros">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M4 10c1.5-4 4-4 5.5 0S12 14 12 14s1-8 4-8 4 4 4 8"/><path d="M3 20h18"/></svg>
+        Potreros y Ganado <span class="dot"></span>
+      </button>
+      <button data-seccion="produccion">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 22s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="11" r="2.4"/></svg>
+        Producción Agrícola <span class="dot"></span>
+      </button>
+    </nav>
+
+    <div class="menu-eyebrow">Gestión</div>
+    <nav class="menu">
+      <button data-seccion="administracion">
+        <svg class="icono-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>
+        Administración <span class="dot"></span>
+      </button>
+      <button data-seccion="reportes">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
+        Reportes <span class="dot"></span>
+      </button>
+    </nav>
+
+    <div class="menu-eyebrow">Ayuda</div>
+    <nav class="menu">
+      <button data-seccion="manual">
+        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h7"/></svg>
+        Manual de usuario <span class="dot"></span>
+      </button>
+    </nav>
+
+    <div class="usuario-box">
+      <div class="avatar-usuario" id="avatar-usuario">JA</div>
+      <div class="datos">
+        <div class="nombre" id="usuario-nombre">—</div>
+        <div class="rol" id="usuario-rol">—</div>
+      </div>
+      <button class="btn-salir" id="btn-salir" title="Cerrar sesión">
+        <svg class="icono-svg" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="seccion activa" id="seccion-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">Panel general</div>
+          <h1>Dashboard operativo</h1>
+        </div>
+        <div class="fecha" id="fecha-hoy"></div>
+      </div>
+
+      <div class="grid-kpi">
+        <div class="kpi-card bosque">
+          <div class="icono"><svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 22s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="11" r="2.4"/></svg></div>
+          <div class="metric-value" id="kpi-ciclos-activos">0</div>
+          <div class="metric-label">Ciclos activos</div>
+        </div>
+        <div class="kpi-card rojo">
+          <div class="icono"><svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+          <div class="metric-value" id="kpi-alertas-criticas">0</div>
+          <div class="metric-label">Alertas críticas</div>
+        </div>
+        <div class="kpi-card ambar">
+          <div class="icono"><svg class="icono-svg" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
+          <div class="metric-value" id="kpi-stock-critico">0</div>
+          <div class="metric-label">Productos en stock crítico</div>
+        </div>
+        <div class="kpi-card tierra">
+          <div class="icono"><svg class="icono-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.4 1.1-2.2 2.5-2.2s2.5.8 2.5 2c0 2.5-5 1.5-5 4 0 1.2 1.1 2.2 2.5 2.2s2.5-.8 2.5-2.2"/></svg></div>
+          <div class="metric-value" id="kpi-valor-inventario">$0</div>
+          <div class="metric-label">Valor total de inventario</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="panel panel-gastos" id="panel-gastos">
+          <div class="panel-cabecera">
+            <div>
+              <h3>Gastos por categoría</h3>
+              <p class="panel-sub">Cómo se reparte el gasto de la operación</p>
+            </div>
+            <div class="panel-acciones">
+              <span class="pill-ejemplo" id="gastos-ejemplo" hidden>Datos de ejemplo</span>
+              <select class="select-compacto" id="gastos-periodo" aria-label="Período de los gastos">
+                <option value="mes">Este mes</option>
+                <option value="trimestre">Últimos 90 días</option>
+                <option value="anio">Este año</option>
+                <option value="todo">Todo el historial</option>
+              </select>
+            </div>
+          </div>
+          <div class="gastos-marco">
+            <div class="gastos-cuerpo" id="gastos-cuerpo">
+              <div class="vacio">Cargando gastos…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-columna">
+          <div class="panel panel-kardex">
+            <div class="panel-cabecera">
+              <div>
+                <h3>Entradas y salidas de inventario</h3>
+                <p class="panel-sub">Movimientos de las últimas semanas</p>
+              </div>
+            </div>
+            <div class="grafico-contenedor" id="kardex-contenedor">
+              <canvas id="grafico-kardex"></canvas>
+            </div>
+            <div class="vacio" id="kardex-vacio" hidden></div>
+          </div>
+
+          <div class="panel panel-alertas">
+            <div class="panel-cabecera">
+              <div>
+                <h3>Alertas recientes</h3>
+                <p class="panel-sub">Lo que requiere tu atención</p>
+              </div>
+            </div>
+            <div id="lista-alertas"><div class="vacio">Sin alertas registradas.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-gastos-lista">
+        <div class="panel-cabecera">
+          <div>
+            <h3>Gastos registrados</h3>
+            <p class="panel-sub">Los últimos gastos del período seleccionado</p>
+          </div>
+          <button class="btn-secundario" onclick="abrirModal('gasto')">+ Registrar gasto</button>
+        </div>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th class="col-monto">Monto</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-gastos-cuerpo">
+              <tr><td colspan="5" class="vacio">Cargando gastos…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INVENTARIO Y BODEGAS ===================== -->
+    <section class="seccion" id="seccion-inventario">
+      <div class="topbar">
+        <div><div class="eyebrow">Módulo</div><h1>Inventario y Bodegas</h1></div>
+      </div>
+
+      <div class="dos-columnas">
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones">
+            <h3 style="margin:0;">Bodegas</h3>
+            <button class="btn-secundario" onclick="intentarAbrirModalBodega()">+ Nueva bodega</button>
+          </div>
+          <table>
+            <thead><tr><th>Nombre</th><th>Ubicación</th><th>Finca</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-bodegas"></tbody>
+          </table>
+        </div>
+
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones">
+            <h3 style="margin:0;">Registrar movimiento (Kardex)</h3>
+          </div>
+          <form id="form-movimiento">
+            <div class="campo"><label>Producto</label><select id="mov-producto" required></select></div>
+            <div class="campo"><label>Bodega</label><select id="mov-bodega" required></select></div>
+            <div class="campo"><label>Tipo</label>
+              <select id="mov-tipo" required>
+                <option value="entrada">Entrada</option>
+                <option value="salida">Salida</option>
+                <option value="ajuste">Ajuste</option>
+              </select>
+            </div>
+            <div class="campo"><label>Cantidad</label><input type="number" step="0.01" min="0.01" id="mov-cantidad" required /></div>
+            <div class="campo"><label>Referencia</label><input type="text" id="mov-referencia" placeholder="Opcional" /></div>
+            <button type="submit" class="btn-primario">Registrar movimiento</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Productos e Insumos</h3>
+          <div>
+            <input class="busqueda-tabla" id="busqueda-productos" type="search" placeholder="Buscar por código o nombre..." aria-label="Buscar productos" />
+            <button class="btn-secundario" onclick="abrirModal('producto')">+ Nuevo producto</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Precio unitario</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-productos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== POTREROS Y GANADO ===================== -->
+    <section class="seccion" id="seccion-potreros">
+      <div class="topbar">
+        <div><div class="eyebrow">Módulo</div><h1>Potreros y Ganado</h1></div>
+      </div>
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Capacidad por potrero</h3>
+          <button class="btn-secundario" onclick="abrirModal('potrero')">+ Nuevo potrero</button>
+        </div>
+        <div class="tarjetas-potreros" id="tarjetas-potreros"></div>
+      </div>
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Registro de animales</h3>
+          <button class="btn-secundario" onclick="abrirModal('animal')">+ Registrar animal</button>
+        </div>
+        <table>
+          <thead><tr><th>ARETE</th><th>Peso</th><th>Salud</th><th>Potrero</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-animales"></tbody>
+        </table>
+      </div>
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Tipos de Pastos y Forrajes</h3>
+          <button class="btn-secundario" onclick="abrirModal('pasto')">+ Nuevo pasto</button>
+        </div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-pastos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCCIÓN AGRÍCOLA ===================== -->
+    <section class="seccion" id="seccion-produccion">
+      <div class="topbar">
+        <div><div class="eyebrow">Módulo</div><h1>Producción Agrícola</h1></div>
+      </div>
+
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Ciclos productivos</h3>
+          <button class="btn-secundario" onclick="abrirModal('ciclo')">+ Nuevo ciclo</button>
+        </div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Cultivo</th><th>Lote</th><th>Inicio</th><th>Estado</th></tr></thead>
+          <tbody id="tabla-ciclos"></tbody>
+        </table>
+      </div>
+
+      <div class="dos-columnas">
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones"><h3 style="margin:0;">Registrar actividad diaria</h3></div>
+          <form id="form-actividad">
+            <div class="campo"><label>Ciclo productivo</label><select id="act-ciclo" required></select></div>
+            <div class="campo"><label>Tipo de actividad</label><input type="text" id="act-tipo" placeholder="Riego, fumigación, poda..." required /></div>
+            <div class="campo"><label>Fecha</label><input type="date" id="act-fecha" required /></div>
+            <div class="campo"><label>Responsable</label><input type="text" id="act-responsable" /></div>
+            <button type="submit" class="btn-primario">Guardar actividad</button>
+          </form>
+        </div>
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones"><h3 style="margin:0;">Registrar cosecha</h3></div>
+          <form id="form-cosecha">
+            <div class="campo"><label>Ciclo productivo</label><select id="cos-ciclo" required></select></div>
+            <div class="campo"><label>Fecha</label><input type="date" id="cos-fecha" required /></div>
+            <div class="campo"><label>Cantidad (kg)</label><input type="number" step="0.01" min="0.01" id="cos-cantidad" required /></div>
+            <div class="campo"><label>Calidad</label>
+              <select id="cos-calidad">
+                <option value="primera">Primera</option>
+                <option value="segunda">Segunda</option>
+                <option value="descarte">Descarte</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-primario">Guardar cosecha</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ADMINISTRACIÓN ===================== -->
+    <section class="seccion" id="seccion-administracion">
+      <div class="topbar">
+        <div><div class="eyebrow">Módulo</div><h1>Administración</h1></div>
+      </div>
+
+      <div class="dos-columnas">
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones">
+            <h3 style="margin:0;">Fincas</h3>
+            <button class="btn-secundario" onclick="abrirModal('finca')">+ Nueva finca</button>
+          </div>
+          <table>
+            <thead><tr><th>Nombre</th><th>Ubicación</th><th>Área (ha)</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-fincas"></tbody>
+          </table>
+        </div>
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones">
+            <h3 style="margin:0;">Lotes</h3>
+            <button class="btn-secundario" onclick="abrirModal('lote')">+ Nuevo lote</button>
+          </div>
+          <table>
+            <thead><tr><th>Nombre</th><th>Cultivo</th><th>Área (ha)</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-lotes"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tarjeta-tabla">
+        <div class="barra-acciones">
+          <h3 style="margin:0;">Proveedores</h3>
+          <button class="btn-secundario" onclick="abrirModal('proveedor')">+ Nuevo proveedor</button>
+        </div>
+        <table>
+          <thead><tr><th>Nombre</th><th>NIT</th><th>Contacto</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-proveedores"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== REPORTES ===================== -->
+    <section class="seccion" id="seccion-reportes">
+      <div class="topbar">
+        <div><div class="eyebrow">Análisis</div><h1>Reportes descargables</h1></div>
+      </div>
+
+      <div class="tarjeta-tabla" style="max-width:460px;">
+        <div class="barra-acciones"><h3 style="margin:0;">Filtrar por finca</h3></div>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+          Acota los tres reportes de abajo a una finca específica antes de descargarlos.
+        </p>
+        <div class="campo">
+          <label>Finca</label>
+          <select id="reporte-finca"><option value="">Todas las fincas</option></select>
+        </div>
+      </div>
+
+      <div class="dos-columnas">
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones"><h3 style="margin:0;">Inventario actual</h3></div>
+          <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+            Stock, valor y estado crítico de todos los productos activos.
+          </p>
+          <div class="modal-acciones" style="margin-top:16px;">
+            <button class="btn-secundario" onclick="descargarReporteInventario('excel')">⬇ Excel</button>
+            <button class="btn-secundario" onclick="descargarReporteInventario('pdf')">⬇ PDF</button>
+          </div>
+        </div>
+
+        <div class="tarjeta-tabla">
+          <div class="barra-acciones"><h3 style="margin:0;">Kardex de movimientos</h3></div>
+          <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+            Entradas, salidas y ajustes en un rango de fechas.
+          </p>
+          <div class="campo"><label>Desde</label><input type="date" id="reporte-kardex-desde" /></div>
+          <div class="campo"><label>Hasta</label><input type="date" id="reporte-kardex-hasta" /></div>
+          <div class="modal-acciones">
+            <button class="btn-secundario" onclick="descargarReporteKardex('excel')">⬇ Excel</button>
+            <button class="btn-secundario" onclick="descargarReporteKardex('pdf')">⬇ PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tarjeta-tabla" style="max-width:460px;">
+        <div class="barra-acciones"><h3 style="margin:0;">Cosechas</h3></div>
+        <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+          Deja el ciclo en blanco para incluir todas las cosechas registradas.
+        </p>
+        <div class="campo"><label>Ciclo productivo (opcional)</label><select id="reporte-cosecha-ciclo"><option value="">Todos los ciclos</option></select></div>
+        <div class="modal-acciones">
+          <button class="btn-secundario" onclick="descargarReporteCosechas('excel')">⬇ Excel</button>
+          <button class="btn-secundario" onclick="descargarReporteCosechas('pdf')">⬇ PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== MANUAL DE USUARIO ===================== -->
+    <section class="seccion" id="seccion-manual">
+      <div class="topbar">
+        <div><div class="eyebrow">Ayuda</div><h1>Manual de usuario</h1></div>
+        <a class="btn-secundario" href="/manual.html" target="_blank" rel="noopener" style="text-decoration:none;">
+          Abrir en pestaña nueva ↗
+        </a>
+      </div>
+
+      <div class="tarjeta-tabla" style="padding:0; overflow:hidden;">
+        <iframe id="iframe-manual" title="Manual de usuario AgroControl Pro"
+                style="width:100%; height:calc(100vh - 210px); min-height:520px; border:0; display:block;"></iframe>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==========================================================================
+     3. MODAL GENÉRICO Y NOTIFICACIONES
+     ========================================================================== -->
+<div class="modal-fondo" id="modal-fondo">
+  <div class="modal-caja" id="modal-contenido"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ==========================================================================
+     4. SCRIPTS EXTERNOS (vistas y componentes)
+     ========================================================================== -->
+<!-- URL del backend (Railway). Debe ir antes del script principal -->
+<script>
+  window.AGROCONTROL_API_BASE = "https://agrocontrol-production-dfd3.up.railway.app";
+</script>
+<script src="/js/theme.js"></script>
+<script src="/js/views/inventory-view.js"></script>
+<script src="/js/views/potreros-view.js"></script>
+<script src="/js/components/inventory-table.js"></script>
+
+<!-- ==========================================================================
+     5. SCRIPT PRINCIPAL
+     Índice:
+       A. Configuración global y estado
+       B. Utilidades generales
+       C. Tema claro / oscuro
+       D. Autenticación (Google + registro + cerrar sesión)
+       E. Navegación e inicio de la app
+       F. Dashboard
+       G. Tablas: botones de acción, editar, borrar
+       H. Inventario y bodegas
+       I. Potreros y ganado
+       J. Producción agrícola
+       K. Administración
+       L. Finca activa
+       M. Modal de configuración
+       N. Reportes
+       Ñ. Manual de usuario
+       O. Modales genéricos (crear / editar)
+       P. Arranque
+     ========================================================================== -->
+<script>
+/* ==========================================================================
+   A. CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN
+   ========================================================================== */
+const API_BASE = window.AGROCONTROL_API_BASE ??
+  (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://localhost:8000" : "");
+
+let TOKEN = localStorage.getItem("agrocontrol_token") || null;
+let USUARIO = JSON.parse(localStorage.getItem("agrocontrol_usuario") || "null");
+
+// Instancia del gráfico del dashboard
+let graficoKardex = null;
+
+// Caché de datos cargados desde la API (una sola declaración por variable)
+let cacheProductos = [];
+let cacheBodegas = [];
+let cacheCiclos = [];
+let cacheFincas = [];
+let cachePotreros = [];
+let cacheAnimales = [];
+let cachePastos = [];
+let cacheLotesActual = [];
+let cacheProveedoresActual = [];
+
+// Finca activa seleccionada (persistida en el navegador)
+let fincaActivaId = localStorage.getItem("agrocontrol_finca_activa") || "";
+
+// Estado de UI
+let busquedaProductos = "";
+let apiOfflineNotificado = false;
+
+// Exponer cachés que otros scripts (views/components) necesitan leer
+window.cachePastos = cachePastos;
+window.cacheProductos = cacheProductos;
+window.obtenerProducto = (productId) => cacheProductos.find((product) => product.id === productId);
+
+/* ==========================================================================
+   B. UTILIDADES GENERALES
+   ========================================================================== */
+function notificarDesconexionApiOnce() {
+  if (!apiOfflineNotificado) {
+    apiOfflineNotificado = true;
+    mostrarToast("No hay conexión con el servidor. Inténtalo de nuevo en unos segundos.", true);
+  }
+}
+
+function mostrarToast(mensaje, esError=false){
+  const t = document.getElementById("toast");
+  t.textContent = mensaje;
+  t.className = "toast" + (esError ? " error" : "");
+  t.style.display = "block";
+  setTimeout(()=> t.style.display = "none", 3500);
+}
+
+async function apiFetch(path, opciones={}){
+  const headers = Object.assign({"Content-Type":"application/json"}, opciones.headers || {});
+  if (TOKEN) headers["Authorization"] = "Bearer " + TOKEN;
+  try {
+    const resp = await fetch(API_BASE + path, Object.assign({}, opciones, {headers}));
+    if (resp.status === 401){
+      cerrarSesion();
+      throw new Error("Sesión expirada");
+    }
+    if (!resp.ok){
+      let detalle = "Error en la solicitud";
+      try { detalle = (await resp.json()).detail || detalle; } catch(e){}
+      throw new Error(detalle);
+    }
+    if (resp.status === 204) return null;
+    return await resp.json();
+  } catch (err) {
+    if (err.name === "TypeError" || err.message?.includes("Failed to fetch") || err.message?.includes("ERR_CONNECTION_REFUSED")) {
+      throw new Error("ERR_NETWORK_DISCONNECTED");
+    }
+    throw err;
+  }
+}
+
+function formatoMoneda(valor){
+  return "$" + Number(valor || 0).toLocaleString("es-CO", {maximumFractionDigits:0});
+}
+
+function iniciales(nombre){
+  if (!nombre) return "??";
+  const partes = nombre.trim().split(/\s+/);
+  return ((partes[0]?.[0] || "") + (partes[1]?.[0] || "")).toUpperCase();
+}
+
+function esCorreoValido(correo){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo.trim());
+}
+
+function esPasswordSegura(password){
+  return password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password);
+}
+
+function marcarCampo(campo, valido){
+  campo.classList.toggle("invalido", !valido);
+  campo.setAttribute("aria-invalid", String(!valido));
+  return valido;
+}
+
+function cambiarEstadoCarga(boton, cargando, texto){
+  if (!boton) return;
+  if (cargando){
+    boton.dataset.textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.innerHTML = '<span class="spinner" aria-hidden="true"></span>' + texto;
+  } else {
+    boton.disabled = false;
+    boton.textContent = boton.dataset.textoOriginal || texto;
+  }
+}
+
+function escaparHtml(texto){
+  return String(texto ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c]));
+}
+
+// Exponer utilidades usadas por scripts externos (views/components)
+window.apiFetch = apiFetch;
+window.mostrarToast = mostrarToast;
+window.notificarDesconexionApiOnce = notificarDesconexionApiOnce;
+
+/* ==========================================================================
+   C. TEMA (CLARO / OSCURO)
+   ========================================================================== */
+if (typeof window.toggleTheme !== "function"){
+  window.toggleTheme = function(){
+    const actual = document.documentElement.getAttribute("data-theme") || "claro";
+    const nuevo = actual === "oscuro" ? "claro" : "oscuro";
+    document.documentElement.setAttribute("data-theme", nuevo);
+    try{ localStorage.setItem("agrocontrol_tema", nuevo); }catch(e){}
+    const btn = document.getElementById("btn-tema");
+    const texto = document.getElementById("texto-tema");
+    if (btn) btn.setAttribute("aria-pressed", String(nuevo === "oscuro"));
+    if (texto) texto.textContent = nuevo === "oscuro" ? "Modo claro" : "Modo oscuro";
+  };
+}
+(function inicializarTextoTema(){
+  const actual = document.documentElement.getAttribute("data-theme") || "claro";
+  const texto = document.getElementById("texto-tema");
+  const btn = document.getElementById("btn-tema");
+  if (texto) texto.textContent = actual === "oscuro" ? "Modo claro" : "Modo oscuro";
+  if (btn) btn.setAttribute("aria-pressed", String(actual === "oscuro"));
+})();
+
+/* ==========================================================================
+   D. AUTENTICACIÓN
+   ========================================================================== */
+/* --- D1. Validación de campos del registro --- */
+function configurarValidacionAutenticacion(){
+  const correoRegistro = document.getElementById("registro-correo");
+  const passwordRegistro = document.getElementById("registro-password");
+  const confirmacion = document.getElementById("registro-confirmacion");
+
+  correoRegistro.addEventListener("input", () => marcarCampo(correoRegistro, esCorreoValido(correoRegistro.value)));
+  passwordRegistro.addEventListener("input", () => {
+    marcarCampo(passwordRegistro, esPasswordSegura(passwordRegistro.value));
+    if (confirmacion.value) marcarCampo(confirmacion, confirmacion.value === passwordRegistro.value);
+  });
+  confirmacion.addEventListener("input", () => marcarCampo(confirmacion, confirmacion.value === passwordRegistro.value && confirmacion.value.length > 0));
+}
+configurarValidacionAutenticacion();
+
+/* --- D2. Login con Google (OAuth 2.0 con redirección en el backend) ---
+   No hay Client ID ni SDK de Google en el frontend: el navegador navega al
+   backend, que conoce GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET y habla con
+   Google. Al terminar, Google redirige de regreso aquí con el token de
+   AgroControl Pro en el fragmento de la URL (después de "#"). */
+document.getElementById("btn-google-login")?.addEventListener("click", () => {
+  window.location.href = API_BASE + "/api/auth/google/login";
+});
+
+document.getElementById("btn-cerrar-modal-login")?.addEventListener("click", () => {
+  document.getElementById("pantalla-login").style.display = "none";
+});
+
+/* --- D3. Registro con correo y contraseña --- */
+const contenedorAutenticacion = document.getElementById("contenedor-autenticacion");
+const errorRegistro = document.getElementById("error-registro");
+
+document.getElementById("mostrar-registro").addEventListener("click", ()=>{
+  contenedorAutenticacion.classList.add("registro-activo");
+  errorRegistro.style.display = "none";
+});
+
+document.getElementById("mostrar-login").addEventListener("click", ()=>{
+  contenedorAutenticacion.classList.remove("registro-activo");
+  errorRegistro.style.display = "none";
+});
+
+document.getElementById("form-registro").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  errorRegistro.style.display = "none";
+
+  const correo = document.getElementById("registro-correo").value.trim().toLowerCase();
+  const password = document.getElementById("registro-password").value;
+  const confirmacion = document.getElementById("registro-confirmacion").value;
+  const correoValido = esCorreoValido(correo);
+  const passwordValida = esPasswordSegura(password);
+  const confirmacionValida = password === confirmacion && confirmacion.length > 0;
+  marcarCampo(document.getElementById("registro-correo"), correoValido);
+  marcarCampo(document.getElementById("registro-password"), passwordValida);
+  marcarCampo(document.getElementById("registro-confirmacion"), confirmacionValida);
+  if (!correoValido || !passwordValida || !confirmacionValida){
+    errorRegistro.textContent = "Usa un correo válido y una contraseña de 8 caracteres con mayúscula, minúscula y número.";
+    errorRegistro.style.display = "block";
+    return;
+  }
+  const boton = e.target.querySelector("button[type=submit]");
+  cambiarEstadoCarga(boton, true, "Creando cuenta...");
+
+  try{
+    await apiFetch("/api/auth/register", {
+      method:"POST",
+      body: JSON.stringify({
+        nombre_completo: document.getElementById("registro-nombre").value.trim(),
+        nombre_usuario: document.getElementById("registro-usuario").value.trim(),
+        correo,
+        password
+      })
+    });
+
+    // Entra directo con la cuenta recién creada
+    const data = await apiFetch("/api/auth/login", {
+      method:"POST",
+      body: JSON.stringify({identificador: correo, password})
+    });
+    TOKEN = data.access_token;
+    USUARIO = data.usuario;
+    localStorage.setItem("agrocontrol_token", TOKEN);
+    localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
+
+    document.getElementById("form-registro").reset();
+    contenedorAutenticacion.classList.remove("registro-activo");
+    iniciarApp();
+  }catch(err){
+    errorRegistro.textContent = err.message || "No se pudo crear la cuenta.";
+    errorRegistro.style.display = "block";
+  }finally{
+    cambiarEstadoCarga(boton, false, "Registrarse");
+  }
+});
+
+/* --- D4. Cerrar sesión --- */
+function cerrarSesion(){
+  TOKEN = null; USUARIO = null;
+  localStorage.removeItem("agrocontrol_token");
+  localStorage.removeItem("agrocontrol_usuario");
+  document.getElementById("app").classList.remove("activo");
+  document.getElementById("pantalla-login").style.display = "flex";
+}
+document.getElementById("btn-salir").addEventListener("click", cerrarSesion);
+
+/* ==========================================================================
+   E. NAVEGACIÓN ENTRE SECCIONES E INICIO DE LA APP
+   ========================================================================== */
+document.querySelectorAll("nav.menu button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("nav.menu button").forEach(b=>b.classList.remove("activo"));
+    btn.classList.add("activo");
+    const seccion = btn.dataset.seccion;
+    document.querySelectorAll(".seccion").forEach(s=>s.classList.remove("activa"));
+    const destino = document.getElementById("seccion-" + seccion);
+    if (destino) destino.classList.add("activa");
+    if (seccion === "dashboard") cargarDashboard();
+    if (seccion === "inventario") cargarInventario();
+    if (seccion === "potreros") cargarPotreros();
+    if (seccion === "produccion") cargarProduccion();
+    if (seccion === "administracion") cargarAdministracion();
+    if (seccion === "reportes") cargarReportes();
+    if (seccion === "manual") cargarManual();
+  });
+});
+
+function iniciarApp(){
+  document.getElementById("pantalla-login").style.display = "none";
+  document.getElementById("app").classList.add("activo");
+  const nombreMostrado = USUARIO.nombre_completo || USUARIO.nombre_usuario;
+  document.getElementById("usuario-nombre").textContent = nombreMostrado;
+  document.getElementById("usuario-rol").textContent = USUARIO.rol;
+  document.getElementById("avatar-usuario").textContent = iniciales(nombreMostrado);
+  document.getElementById("fecha-hoy").textContent = new Date().toLocaleDateString("es-CO", {
+    weekday:"long", year:"numeric", month:"long", day:"numeric"
+  });
+  cargarDashboard();
+  apiFetch("/api/admin/fincas").then(fincas => { cacheFincas = fincas; renderSelectoresFinca(); }).catch(()=>{});
+}
+
+/* ==========================================================================
+   F. MÓDULO: DASHBOARD
+   ========================================================================== */
+let ultimoResumenDashboard = null;
+let graficoGastosAnimado = false;
+let firmaKardex = null;          // para no redibujar el kardex si los datos no cambiaron
+let dashboardCargando = false;   // evita pedir el resumen dos veces a la vez
+let dashboardPendiente = false;  // si guardas algo mientras carga, se vuelve a cargar al terminar
+let cacheGastos = [];
+let periodoGastos = "mes";
+try{ periodoGastos = localStorage.getItem("agrocontrol_periodo_gastos") || "mes"; }catch(e){}
+if (!["mes", "trimestre", "anio", "todo"].includes(periodoGastos)) periodoGastos = "mes";
+let estadoGastos = null;   // {items, total, porcentajes, hover, pin}
+
+// Categorías del gráfico circular (el color viene de los tokens CSS)
+const CATEGORIAS_GASTO = [
+  {clave:"insumos",    nombre:"Insumos",      color:"var(--chart-insumos)"},
+  {clave:"mano_obra",  nombre:"Mano de obra", color:"var(--chart-mano-obra)"},
+  {clave:"maquinaria", nombre:"Maquinaria",   color:"var(--chart-maquinaria)"},
+  {clave:"otros",      nombre:"Otros",        color:"var(--chart-otros)"}
+];
+
+// Datos de muestra: solo se usan si la API todavía no envía "gastos_por_categoria"
+const GASTOS_EJEMPLO = {insumos:11106000, mano_obra:6170000, maquinaria:4936000, otros:2468000};
+
+// Convierte cualquier nombre de categoría que venga de la API a una de las 4 categorías fijas
+function claveCategoriaGasto(texto){
+  const t = String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (t.includes("insumo")) return "insumos";
+  if (t.includes("mano") || t.includes("obra")) return "mano_obra";
+  if (t.includes("maquin")) return "maquinaria";
+  return "otros";
+}
+
+// Acepta {insumos: 100, ...} o [{categoria:"Insumos", monto:100}, ...]
+function normalizarGastos(fuente){
+  const acum = {insumos:0, mano_obra:0, maquinaria:0, otros:0};
+  const sumar = (nombre, valor) => {
+    if (valor && typeof valor === "object") valor = valor.monto ?? valor.total ?? valor.valor;
+    const n = Number(valor);
+    if (Number.isFinite(n) && n > 0) acum[claveCategoriaGasto(nombre)] += n;
+  };
+  if (Array.isArray(fuente)){
+    fuente.forEach(it => sumar(it.categoria ?? it.nombre ?? it.label, it.monto ?? it.total ?? it.valor ?? it.gasto));
+  } else if (fuente && typeof fuente === "object"){
+    Object.entries(fuente).forEach(([nombre, valor]) => sumar(nombre, valor));
+  }
+  return acum;
+}
+
+// Porcentajes enteros que siempre suman 100 (método del mayor resto)
+function porcentajesEnteros(valores){
+  const total = valores.reduce((a, b) => a + b, 0);
+  if (!total) return valores.map(() => 0);
+  const bruto = valores.map(v => v / total * 100);
+  const base = bruto.map(Math.floor);
+  let faltan = 100 - base.reduce((a, b) => a + b, 0);
+  bruto.map((b, i) => ({i, resto: b - Math.floor(b)}))
+       .sort((a, b) => b.resto - a.resto)
+       .slice(0, faltan)
+       .forEach(o => { base[o.i] += 1; });
+  return base;
+}
+
+function formatoMonedaCentro(valor){
+  if (valor >= 1e9){
+    // Cifras muy grandes se abrevian en millones para que quepan dentro del círculo
+    return "$" + Math.round(valor / 1e6).toLocaleString("es-CO") + " M";
+  }
+  return formatoMoneda(valor);
+}
+
+function textoPorcentaje(valor, pct){
+  return (valor > 0 && pct === 0) ? "<1%" : pct + "%";
+}
+
+function renderGraficoGastos(fuente, esEjemplo){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo) return;
+  const pill = document.getElementById("gastos-ejemplo");
+  if (pill) pill.hidden = !esEjemplo;
+
+  const acum = normalizarGastos(fuente);
+  const items = CATEGORIAS_GASTO.map(c => Object.assign({}, c, {valor: acum[c.clave]}));
+  const total = items.reduce((suma, it) => suma + it.valor, 0);
+
+  const firma = JSON.stringify([acum, esEjemplo]);
+  if (total > 0 && estadoGastos && !estadoGastos.vacio && estadoGastos.firma === firma
+      && document.querySelector("#gastos-cuerpo .donut-caja")) return;
+
+  if (!total){
+    estadoGastos = {vacio:true};
+    cuerpo.removeAttribute("data-foco");
+    cuerpo.classList.remove("animar");
+    cuerpo.innerHTML = `
+      <div class="gastos-vacio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/>
+        </svg>
+        <strong>Aún no hay gastos en este período</strong>
+        <span>Registra un gasto y aquí verás cómo se reparte entre insumos, mano de obra, maquinaria y otros.</span>
+        <button type="button" class="btn-secundario" onclick="abrirModal('gasto')">+ Registrar gasto</button>
+      </div>`;
+    return;
+  }
+
+  const porcentajes = porcentajesEnteros(items.map(it => it.valor));
+  const R = 78, SW = 18, C = 2 * Math.PI * R, GAP = SW + 5;
+  const activos = items.filter(it => it.valor > 0).length;
+
+  let inicio = 0;
+  const segmentos = items.map((it, i) => {
+    if (!it.valor) return "";
+    const largo = it.valor / total * C;
+    const unico = activos === 1;
+    const dash = unico ? C : Math.max(largo - GAP, 0.01);
+    const desplazamiento = unico ? 0 : inicio + GAP / 2;
+    inicio += largo;
+    return `<circle class="donut-seg${unico ? " donut-seg--unico" : ""}" data-idx="${i}"
+              cx="100" cy="100" r="${R}"
+              style="--c:${it.color}; --dash:${dash.toFixed(2)}; --off:${(-desplazamiento).toFixed(2)}; --i:${i}"/>`;
+  }).join("");
+
+  const resumenAccesible = items
+    .map((it, i) => `${escaparHtml(it.nombre)} ${textoPorcentaje(it.valor, porcentajes[i])}`).join(", ");
+
+  const filas = items.map((it, i) => `
+    <li>
+      <button type="button" class="gasto-fila" data-idx="${i}" aria-pressed="false"
+              style="--c:${it.color}; --w:${it.valor / total * 100}%; --i:${i}">
+        <span class="gasto-fila__punto"></span>
+        <span class="gasto-fila__nombre">${escaparHtml(it.nombre)}</span>
+        <span class="gasto-fila__monto">${formatoMoneda(it.valor)}</span>
+        <span class="gasto-fila__pct">${textoPorcentaje(it.valor, porcentajes[i])}</span>
+        <span class="gasto-fila__barra"><i></i></span>
+      </button>
+    </li>`).join("");
+
+  const pinAnterior = (estadoGastos && !estadoGastos.vacio) ? estadoGastos.pin : null;
+  estadoGastos = {vacio:false, items, total, porcentajes, hover:null, pin:pinAnterior, firma};
+
+  cuerpo.classList.toggle("animar", !graficoGastosAnimado);
+  graficoGastosAnimado = true;
+  cuerpo.innerHTML = `
+    <div class="donut-caja">
+      <svg class="donut-svg" viewBox="0 0 200 200" role="img"
+           aria-label="Distribución de gastos por categoría: ${resumenAccesible}"
+           style="--C:${C.toFixed(2)}; --sw:${SW}px">
+        <g transform="rotate(-90 100 100)">
+          <circle class="donut-pista" cx="100" cy="100" r="${R}"/>
+          ${segmentos}
+        </g>
+      </svg>
+      <div class="donut-centro">
+        <span class="donut-centro__label" id="donut-label"></span>
+        <strong class="donut-centro__valor" id="donut-valor"></strong>
+        <span class="donut-centro__sub" id="donut-sub"></span>
+      </div>
+    </div>
+    <ul class="gastos-leyenda">${filas}</ul>`;
+
+  aplicarFocoGastos();
+}
+
+// Resalta la categoría enfocada (hover, teclado o toque) y actualiza el centro del gráfico
+function aplicarFocoGastos(){
+  const e = estadoGastos;
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!e || e.vacio || !cuerpo) return;
+
+  const idx = e.hover ?? e.pin;
+  if (idx === null) cuerpo.removeAttribute("data-foco");
+  else cuerpo.setAttribute("data-foco", String(idx));
+
+  cuerpo.querySelectorAll("[data-idx]").forEach(el => {
+    const activo = Number(el.dataset.idx) === idx;
+    el.classList.toggle("foco", activo);
+    if (el.tagName === "BUTTON") el.setAttribute("aria-pressed", String(e.pin === Number(el.dataset.idx)));
+  });
+
+  const label = document.getElementById("donut-label");
+  const valor = document.getElementById("donut-valor");
+  const sub = document.getElementById("donut-sub");
+  if (!label || !valor || !sub) return;
+
+  if (idx === null){
+    const mayor = e.items.reduce((m, it, i) => (it.valor > e.items[m].valor ? i : m), 0);
+    label.textContent = "Total gastos";
+    valor.textContent = formatoMonedaCentro(e.total);
+    sub.textContent = `Mayor: ${e.items[mayor].nombre} ${textoPorcentaje(e.items[mayor].valor, e.porcentajes[mayor])}`;
+  } else {
+    const it = e.items[idx];
+    label.innerHTML = `<i class="punto" style="--c:${it.color}"></i>${escaparHtml(it.nombre)}`;
+    valor.textContent = formatoMonedaCentro(it.valor);
+    sub.textContent = `${textoPorcentaje(it.valor, e.porcentajes[idx])} del total`;
+  }
+}
+
+// Eventos del gráfico de gastos (se registran una sola vez, con delegación)
+(function activarInteraccionGastos(){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo) return;
+  const indiceDe = (el) => {
+    const nodo = el && el.closest ? el.closest("[data-idx]") : null;
+    return nodo ? Number(nodo.dataset.idx) : null;
+  };
+  cuerpo.addEventListener("pointerover", (ev) => {
+    if (ev.pointerType !== "mouse" || !estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = indiceDe(ev.target);
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("pointerleave", (ev) => {
+    if (ev.pointerType !== "mouse" || !estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = null;
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("focusin", (ev) => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    const i = indiceDe(ev.target);
+    if (i !== null){ estadoGastos.hover = i; aplicarFocoGastos(); }
+  });
+  cuerpo.addEventListener("focusout", () => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    estadoGastos.hover = null;
+    aplicarFocoGastos();
+  });
+  cuerpo.addEventListener("click", (ev) => {
+    if (!estadoGastos || estadoGastos.vacio) return;
+    const i = indiceDe(ev.target);
+    if (i === null) return;
+    estadoGastos.pin = (estadoGastos.pin === i) ? null : i;
+    aplicarFocoGastos();
+  });
+})();
+
+(function iniciarSelectorPeriodo(){
+  const sel = document.getElementById("gastos-periodo");
+  if (!sel) return;
+  sel.value = periodoGastos;
+  sel.addEventListener("change", () => {
+    periodoGastos = sel.value;
+    try{ localStorage.setItem("agrocontrol_periodo_gastos", periodoGastos); }catch(e){}
+    cargarDashboard();
+  });
+})();
+
+function formatoFechaCorta(iso){
+  const d = new Date(String(iso).slice(0, 10) + "T00:00:00");
+  return isNaN(d) ? escaparHtml(iso) : d.toLocaleDateString("es-CO", {day:"numeric", month:"short", year:"numeric"});
+}
+
+// Tabla "Gastos registrados" (lista === null significa que no se pudo cargar)
+function renderTablaGastos(lista){
+  const cuerpo = document.getElementById("tabla-gastos-cuerpo");
+  if (!cuerpo) return;
+  if (lista === null){
+    if (!cacheGastos.length) cuerpo.innerHTML = '<tr><td colspan="5" class="vacio">No se pudo cargar la lista de gastos.</td></tr>';
+    return;
+  }
+  cacheGastos = lista;
+  if (!lista.length){
+    cuerpo.innerHTML = '<tr><td colspan="5" class="vacio">Aún no hay gastos en este período.</td></tr>';
+    return;
+  }
+  cuerpo.innerHTML = lista.map(g => {
+    const cat = CATEGORIAS_GASTO.find(c => c.clave === claveCategoriaGasto(g.categoria)) || CATEGORIAS_GASTO[3];
+    return `
+      <tr>
+        <td class="celda-fecha">${formatoFechaCorta(g.fecha)}</td>
+        <td><span class="gasto-cat" style="--c:${cat.color}"><i></i>${escaparHtml(cat.nombre)}</span></td>
+        <td class="celda-desc" title="${escaparHtml(g.descripcion)}">${escaparHtml(g.descripcion)}</td>
+        <td class="celda-monto">${formatoMoneda(g.monto)}</td>
+        <td>${botonesAccion("gasto", g.id)}</td>
+      </tr>`;
+  }).join("");
+}
+
+function mostrarGastosNoDisponibles(){
+  const cuerpo = document.getElementById("gastos-cuerpo");
+  if (!cuerpo || estadoGastos) return;
+  cuerpo.innerHTML = '<div class="vacio">No se pudieron cargar los gastos. Intenta de nuevo en unos segundos.</div>';
+}
+
+function leerTokenCss(nombre, alternativo){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+  return v || alternativo;
+}
+
+function renderGraficoKardex(r, forzar){
+  const canvas = document.getElementById("grafico-kardex");
+  const contenedor = document.getElementById("kardex-contenedor");
+  const vacio = document.getElementById("kardex-vacio");
+  if (!canvas || !contenedor || !vacio) return;
+
+  const semanas = (r && r.movimientos_kardex_semanal) || [];
+
+  if (typeof Chart === "undefined"){
+    contenedor.hidden = true;
+    vacio.hidden = false;
+    vacio.textContent = "No se pudo cargar la librería de gráficos (Chart.js). Revisa tu conexión a internet o si algo está bloqueando cdn.jsdelivr.net.";
+    return;
+  }
+  if (!semanas.length){
+    if (graficoKardex){ graficoKardex.destroy(); graficoKardex = null; }
+    contenedor.hidden = true;
+    vacio.hidden = false;
+    vacio.textContent = "Aún no hay movimientos de inventario en las últimas semanas.";
+    return;
+  }
+  contenedor.hidden = false;
+  vacio.hidden = true;
+
+  const firma = JSON.stringify(semanas);
+  if (!forzar && graficoKardex && firmaKardex === firma) return;
+  firmaKardex = firma;
+
+  const colorEntradas = leerTokenCss("--chart-entradas", "#16a97a");
+  const colorSalidas  = leerTokenCss("--chart-salidas", "#d99420");
+  const colorTexto    = leerTokenCss("--text-muted", "#5c6570");
+  const colorTitulo   = leerTokenCss("--text-main", "#12161a");
+  const colorGrilla   = leerTokenCss("--border-subtle", "#e6e8eb");
+  const colorPanel    = leerTokenCss("--surface-panel", "#ffffff");
+  const colorBorde    = leerTokenCss("--border-strong", "#d3d7dc");
+  const fuente = "'Inter', system-ui, sans-serif";
+
+  if (graficoKardex) graficoKardex.destroy();
+  graficoKardex = new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: semanas.map(s => s.semana),
+      datasets: [
+        {label:"Entradas", data: semanas.map(s => s.entradas || 0), backgroundColor: colorEntradas, borderRadius: 8, borderSkipped: false, maxBarThickness: 26},
+        {label:"Salidas",  data: semanas.map(s => s.salidas  || 0), backgroundColor: colorSalidas,  borderRadius: 8, borderSkipped: false, maxBarThickness: 26}
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {mode: "index", intersect: false},
+      datasets: {bar: {categoryPercentage: 0.72, barPercentage: 0.9}},
+      plugins: {
+        legend: {
+          position: "top", align: "end",
+          labels: {usePointStyle: true, pointStyle: "circle", boxWidth: 8, boxHeight: 8, padding: 14, color: colorTexto, font: {family: fuente, size: 12, weight: "600"}}
+        },
+        tooltip: {
+          backgroundColor: colorPanel, titleColor: colorTitulo, bodyColor: colorTexto,
+          borderColor: colorBorde, borderWidth: 1, padding: 12, cornerRadius: 12,
+          boxPadding: 5, usePointStyle: true,
+          titleFont: {family: fuente, weight: "700"}, bodyFont: {family: fuente},
+          callbacks: {label: (c) => ` ${c.dataset.label}: ${Number(c.parsed.y).toLocaleString("es-CO")}`}
+        }
+      },
+      scales: {
+        y: {beginAtZero: true, border: {display: false}, grid: {color: colorGrilla, borderDash: [4, 4]}, ticks: {color: colorTexto, padding: 8, font: {family: fuente, size: 11}}},
+        x: {border: {display: false}, grid: {display: false}, ticks: {color: colorTexto, font: {family: fuente, size: 11}}}
+      }
+    }
+  });
+}
+
+// Chart.js pinta con colores fijos: al cambiar de tema hay que redibujar el kardex
+// y avisarle al manual (iframe) para que también cambie de tema.
+new MutationObserver(() => {
+  if (ultimoResumenDashboard) renderGraficoKardex(ultimoResumenDashboard, true);
+  sincronizarTemaManual();
+}).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+
+async function cargarDashboard(opciones = {}){
+  if (dashboardCargando){
+    if (!opciones.silencioso) dashboardPendiente = true;   // se vuelve a cargar cuando termine la actual
+    return;
+  }
+  dashboardCargando = true;
+  try{
+    const [r, listaGastos] = await Promise.all([
+      apiFetch("/api/dashboard/resumen?periodo=" + encodeURIComponent(periodoGastos)),
+      apiFetch("/api/gastos?limite=10&periodo=" + encodeURIComponent(periodoGastos)).catch(() => null)
+    ]);
+    if (!r) return;
+    ultimoResumenDashboard = r;
+
+    const elCiclos = document.getElementById("kpi-ciclos-activos");
+    if (elCiclos) elCiclos.textContent = r.ciclos_activos ?? 0;
+    const elAlertas = document.getElementById("kpi-alertas-criticas");
+    if (elAlertas) elAlertas.textContent = r.alertas_criticas ?? 0;
+    const elStock = document.getElementById("kpi-stock-critico");
+    if (elStock) elStock.textContent = r.productos_stock_critico ?? 0;
+    const elValor = document.getElementById("kpi-valor-inventario");
+    if (elValor) elValor.textContent = formatoMoneda(r.valor_inventario);
+
+    const listaAlertas = document.getElementById("lista-alertas");
+    if (listaAlertas) {
+      if (!r.alertas_recientes || !r.alertas_recientes.length){
+        listaAlertas.innerHTML = '<div class="vacio">Sin alertas registradas.</div>';
+      } else {
+        listaAlertas.innerHTML = r.alertas_recientes.map(a => `
+          <div class="alerta-item">
+            <div class="alerta-sev ${escaparHtml(a.severidad)}"></div>
+            <div>
+              <div><strong>${escaparHtml(a.titulo)}</strong></div>
+              <div class="msg">${escaparHtml(a.mensaje)}</div>
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    // Gastos por categoría: la API debe enviar "gastos_por_categoria"
+    const gastosApi = r.gastos_por_categoria ?? r.gastos ?? r.distribucion_gastos;
+    if (gastosApi === undefined || gastosApi === null){
+      console.info("[AgroControl] /api/dashboard/resumen no incluye 'gastos_por_categoria'; se muestran datos de ejemplo.");
+      renderGraficoGastos(GASTOS_EJEMPLO, true);
+    } else {
+      renderGraficoGastos(gastosApi, false);
+    }
+
+    renderGraficoKardex(r);
+    renderTablaGastos(listaGastos);
+  }catch(err){
+    mostrarGastosNoDisponibles();
+    if (opciones.silencioso) return;   // las actualizaciones automáticas no molestan con avisos
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }finally{
+    dashboardCargando = false;
+    if (dashboardPendiente){ dashboardPendiente = false; cargarDashboard(); }
+  }
+}
+
+/* --- Actualización automática del dashboard ---
+   Se refresca solo cada 20 s mientras la pestaña está a la vista y estás en
+   el Dashboard, y al volver a la pestaña. */
+const INTERVALO_DASHBOARD_MS = 20000;
+function dashboardVisible(){
+  const app = document.getElementById("app");
+  const sec = document.getElementById("seccion-dashboard");
+  return !document.hidden && !!TOKEN && !!app && app.classList.contains("activo")
+      && !!sec && sec.classList.contains("activa");
+}
+setInterval(() => { if (dashboardVisible()) cargarDashboard({silencioso:true}); }, INTERVALO_DASHBOARD_MS);
+document.addEventListener("visibilitychange", () => { if (dashboardVisible()) cargarDashboard({silencioso:true}); });
+
+/* ==========================================================================
+   G. UTILIDADES DE TABLAS (BOTONES DE ACCIÓN, EDITAR, BORRAR)
+   ========================================================================== */
+function botonesAccion(tipo, id){
+  return `
+    <button class="btn-icono" title="Editar" onclick="editarRegistro('${tipo}', ${id})">
+      <svg class="icono-svg" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+    <button class="btn-icono peligro" title="Borrar" onclick="borrarRegistro('${tipo}', ${id})">
+      <svg class="icono-svg" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>
+  `;
+}
+
+window.editarRegistro = (tipo, id) => {
+  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual, gasto: cacheGastos};
+  const registro = (mapaCache[tipo] || []).find(item => item.id === id);
+  if (registro) abrirModal(tipo, registro);
+};
+
+window.borrarRegistro = async (tipo, id) => {
+  const mapaCache = {bodega: cacheBodegas, finca: cacheFincas, lote: cacheLotesActual, proveedor: cacheProveedoresActual, gasto: cacheGastos};
+  const mapaRecarga = {bodega: cargarInventario, finca: cargarAdministracion, lote: cargarAdministracion, proveedor: cargarAdministracion, gasto: cargarDashboard};
+  const registro = (mapaCache[tipo] || []).find(item => item.id === id);
+  const nombreMostrado = registro?.nombre || registro?.descripcion || `#${id}`;
+  if (!confirm(`¿Seguro que quieres borrar "${nombreMostrado}"? Esta acción no se puede deshacer.`)) return;
+  try{
+    await apiFetch(`${formulariosModal[tipo].endpoint}/${id}`, {method:"DELETE"});
+    mostrarToast("Registro borrado correctamente");
+    mapaRecarga[tipo]();
+  }catch(err){ mostrarToast(err.message, true); }
+};
+
+window.toggleEstadoBodega = async (id, nuevoEstado) => {
+  const accion = nuevoEstado ? "habilitar" : "deshabilitar";
+  const bodega = (cacheBodegas || []).find(b => b.id === id);
+  const nombre = bodega ? bodega.nombre : `#${id}`;
+  if (!confirm(`¿Deseas ${accion} la bodega "${nombre}"?`)) return;
+  try {
+    await apiFetch(`/api/inventario/bodegas/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ activo: nuevoEstado })
+    });
+    mostrarToast(`Bodega ${nuevoEstado ? 'habilitada' : 'deshabilitada'} correctamente`);
+    cargarInventario();
+  } catch(err) {
+    mostrarToast(err.message, true);
+  }
+};
+
+/* ==========================================================================
+   H. MÓDULO: INVENTARIO Y BODEGAS
+   ========================================================================== */
+async function cargarInventario(){
+  try{
+    const [bodegas, productos] = await Promise.all([
+      apiFetch("/api/inventario/bodegas").catch(() => null),
+      apiFetch("/api/inventario/productos").catch(() => null)
+    ]);
+    if (bodegas) cacheBodegas = bodegas;
+    if (productos) cacheProductos = productos;
+    window.cacheProductos = cacheProductos || [];
+
+    const tablaBodegas = document.getElementById("tabla-bodegas");
+    if (tablaBodegas) {
+      tablaBodegas.innerHTML = (cacheBodegas || []).map(b => {
+        const finca = (cacheFincas || []).find(f => f.id === b.finca_id);
+        return `
+        <tr>
+          <td>${escaparHtml(b.nombre)}</td>
+          <td>${escaparHtml(b.ubicacion || "—")}</td>
+          <td>${finca ? escaparHtml(finca.nombre) : (b.finca_id ? `#${b.finca_id}` : "—")}</td>
+          <td><span class="badge ${b.activo ? 'ok' : 'critico'}">${b.activo ? 'Activa' : 'Inactiva'}</span></td>
+          <td>
+            <button class="btn-icono" title="Editar" onclick="editarRegistro('bodega', ${b.id})">
+              <svg class="icono-svg" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+            <button class="btn-tabla ${b.activo ? 'danger' : ''}" type="button" onclick="toggleEstadoBodega(${b.id}, ${!b.activo})">
+              ${b.activo ? 'Deshabilitar' : 'Habilitar'}
+            </button>
+          </td>
+        </tr>
+      `;
+      }).join("") || '<tr><td colspan="5" class="vacio">Sin bodegas registradas</td></tr>';
+    }
+
+    renderizarProductos();
+
+    const selProducto = document.getElementById("mov-producto");
+    if (selProducto) selProducto.innerHTML = (cacheProductos || []).map(p => `<option value="${p.id}">${escaparHtml(p.nombre)} (${escaparHtml(p.codigo)})</option>`).join("");
+    const selBodega = document.getElementById("mov-bodega");
+    if (selBodega) selBodega.innerHTML = (cacheBodegas || []).filter(b => b.activo).map(b => `<option value="${b.id}">${escaparHtml(b.nombre)}</option>`).join("");
+  }catch(err){
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }
+}
+window.cargarInventario = cargarInventario;
+
+function renderizarProductos(){
+  const termino = busquedaProductos.trim().toLowerCase();
+  const productosFiltrados = cacheProductos.filter((producto) => {
+    if (!termino) return true;
+    return [producto.codigo, producto.nombre, producto.categoria]
+      .filter(Boolean)
+      .some((valor) => String(valor).toLowerCase().includes(termino));
+  });
+  document.getElementById("tabla-productos").innerHTML = renderProductRows(productosFiltrados)
+    || '<tr><td colspan="8" class="vacio">No hay productos que coincidan con la búsqueda.</td></tr>';
+}
+window.renderizarProductos = renderizarProductos;
+
+window.eliminarProductoDeTabla = (productId) => {
+  cacheProductos = cacheProductos.filter((item) => item.id !== productId);
+  window.cacheProductos = cacheProductos;
+  renderizarProductos();
+};
+
+document.getElementById("busqueda-productos").addEventListener("input", (e)=>{
+  busquedaProductos = e.target.value;
+  renderizarProductos();
+});
+
+document.getElementById("form-movimiento").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  try{
+    await apiFetch("/api/inventario/movimientos", {
+      method:"POST",
+      body: JSON.stringify({
+        producto_id: Number(document.getElementById("mov-producto").value),
+        bodega_id: Number(document.getElementById("mov-bodega").value),
+        tipo: document.getElementById("mov-tipo").value,
+        cantidad: Number(document.getElementById("mov-cantidad").value),
+        referencia: document.getElementById("mov-referencia").value || null
+      })
+    });
+    mostrarToast("Movimiento registrado correctamente");
+    e.target.reset();
+    cargarInventario();
+  }catch(err){ mostrarToast(err.message, true); }
+});
+
+/* ==========================================================================
+   I. MÓDULO: POTREROS Y GANADO
+   ========================================================================== */
+async function cargarPotreros(){
+  try{
+    const [potreros, animales, pastos] = await Promise.all([
+      apiFetch("/api/admin/potreros").catch(() => null),
+      apiFetch("/api/admin/animales").catch(() => null),
+      apiFetch("/api/admin/pastos").catch(() => null)
+    ]);
+    if (potreros) cachePotreros = potreros;
+    if (animales) cacheAnimales = animales;
+    if (pastos) cachePastos = pastos;
+    window.cachePastos = cachePastos || [];
+
+    renderPotreros(cachePotreros || [], cacheAnimales || []);
+    renderAnimales(cacheAnimales || [], cachePotreros || []);
+    renderPastos(cachePastos || []);
+  }catch(err){
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }
+}
+window.cargarPotreros = cargarPotreros;
+
+function renderPastos(pastos){
+  const cuerpo = document.getElementById("tabla-pastos");
+  if (!cuerpo) return;
+  cuerpo.innerHTML = pastos.map(p => `
+    <tr>
+      <td><strong>${escaparHtml(p.nombre)}</strong></td>
+      <td>${escaparHtml(p.descripcion || "—")}</td>
+      <td><span class="badge ${p.activo ? 'ok' : 'critico'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+      <td>
+        <button class="btn-tabla ${p.activo ? 'danger' : ''}" type="button" onclick="toggleEstadoPasto(${p.id}, ${!p.activo})">
+          ${p.activo ? 'Deshabilitar' : 'Habilitar'}
+        </button>
+        <button class="btn-icono" title="Editar" onclick="editarPasto(${p.id})">
+          <svg class="icono-svg" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+      </td>
+    </tr>
+  `).join("") || '<tr><td colspan="4" class="vacio">Sin pastos registrados</td></tr>';
+}
+window.renderPastos = renderPastos;
+
+window.editarPasto = (pastoId) => {
+  const pasto = cachePastos.find((item) => item.id === pastoId);
+  if (pasto) abrirModal("pasto", pasto);
+};
+
+window.toggleEstadoPasto = async (id, nuevoEstado) => {
+  const accion = nuevoEstado ? "habilitar" : "deshabilitar";
+  const pasto = cachePastos.find((item) => item.id === id);
+  if (!confirm(`¿Deseas ${accion} el pasto "${pasto?.nombre || id}"?`)) return;
+  try {
+    await apiFetch(`/api/admin/pastos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ activo: nuevoEstado })
+    });
+    mostrarToast(`Pasto ${nuevoEstado ? 'habilitado' : 'deshabilitado'} correctamente`);
+    cargarPotreros();
+  } catch(err) {
+    mostrarToast(err.message, true);
+  }
+};
+
+window.editarPotrero = (potreroId) => {
+  const potrero = cachePotreros.find((item) => item.id === potreroId);
+  if (potrero) abrirModal("potrero", potrero);
+};
+
+window.editarAnimal = (animalId) => {
+  const animal = cacheAnimales.find((item) => item.id === animalId);
+  if (animal) abrirModal("animal", animal);
+};
+
+window.borrarPotrero = async (potreroId) => {
+  const potrero = cachePotreros.find((item) => item.id === potreroId);
+  if (!potrero || !confirm(`¿Borrar el potrero "${potrero.nombre}"?`)) return;
+  try{
+    await apiFetch(`/api/admin/potreros/${potreroId}`, {method:"DELETE"});
+    cachePotreros = cachePotreros.filter((item) => item.id !== potreroId);
+    renderPotreros(cachePotreros, cacheAnimales);
+    mostrarToast("Potrero borrado correctamente");
+  }catch(err){ mostrarToast(err.message, true); }
+};
+
+window.borrarAnimal = async (animalId) => {
+  const animal = cacheAnimales.find((item) => item.id === animalId);
+  if (!animal || !confirm(`¿Borrar el animal "${animal.arete}"?`)) return;
+  try{
+    await apiFetch(`/api/admin/animales/${animalId}`, {method:"DELETE"});
+    cacheAnimales = cacheAnimales.filter((item) => item.id !== animalId);
+    renderPotreros(cachePotreros, cacheAnimales);
+    renderAnimales(cacheAnimales, cachePotreros);
+    mostrarToast("Animal borrado correctamente");
+  }catch(err){ mostrarToast(err.message, true); }
+};
+
+/* ==========================================================================
+   J. MÓDULO: PRODUCCIÓN AGRÍCOLA
+   ========================================================================== */
+async function cargarProduccion(){
+  try{
+    const ciclos = await apiFetch("/api/produccion/ciclos").catch(() => null);
+    if (ciclos) cacheCiclos = ciclos;
+    const tablaCiclos = document.getElementById("tabla-ciclos");
+    if (tablaCiclos) {
+      tablaCiclos.innerHTML = (cacheCiclos || []).map(c => `
+        <tr>
+          <td>${escaparHtml(c.nombre)}</td><td>${escaparHtml(c.cultivo)}</td><td>Lote #${c.lote_id}</td>
+          <td>${escaparHtml(c.fecha_inicio)}</td>
+          <td><span class="badge ${escaparHtml(c.estado)}">${escaparHtml(c.estado)}</span></td>
+        </tr>
+      `).join("") || '<tr><td colspan="5" class="vacio">Sin ciclos registrados</td></tr>';
+    }
+
+    const opciones = (cacheCiclos || []).map(c => `<option value="${c.id}">${escaparHtml(c.nombre)} — ${escaparHtml(c.cultivo)}</option>`).join("");
+    const actCiclo = document.getElementById("act-ciclo");
+    if (actCiclo) actCiclo.innerHTML = opciones;
+    const cosCiclo = document.getElementById("cos-ciclo");
+    if (cosCiclo) cosCiclo.innerHTML = opciones;
+  }catch(err){
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }
+}
+
+document.getElementById("form-actividad").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  try{
+    await apiFetch("/api/produccion/actividades", {
+      method:"POST",
+      body: JSON.stringify({
+        ciclo_id: Number(document.getElementById("act-ciclo").value),
+        tipo_actividad: document.getElementById("act-tipo").value,
+        fecha: document.getElementById("act-fecha").value,
+        responsable: document.getElementById("act-responsable").value || null
+      })
+    });
+    mostrarToast("Actividad registrada correctamente");
+    e.target.reset();
+    cargarProduccion();
+  }catch(err){ mostrarToast(err.message, true); }
+});
+
+document.getElementById("form-cosecha").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  try{
+    await apiFetch("/api/produccion/cosechas", {
+      method:"POST",
+      body: JSON.stringify({
+        ciclo_id: Number(document.getElementById("cos-ciclo").value),
+        fecha: document.getElementById("cos-fecha").value,
+        cantidad_kg: Number(document.getElementById("cos-cantidad").value),
+        calidad: document.getElementById("cos-calidad").value
+      })
+    });
+    mostrarToast("Cosecha registrada correctamente");
+    e.target.reset();
+  }catch(err){ mostrarToast(err.message, true); }
+});
+
+/* ==========================================================================
+   K. MÓDULO: ADMINISTRACIÓN (FINCAS, LOTES, PROVEEDORES)
+   ========================================================================== */
+async function cargarAdministracion(){
+  try{
+    const [fincas, lotes, proveedores] = await Promise.all([
+      apiFetch("/api/admin/fincas").catch(() => null),
+      apiFetch("/api/admin/lotes").catch(() => null),
+      apiFetch("/api/admin/proveedores").catch(() => null)
+    ]);
+    if (fincas) cacheFincas = fincas;
+    if (lotes) cacheLotesActual = lotes;
+    if (proveedores) cacheProveedoresActual = proveedores;
+
+    const tablaFincas = document.getElementById("tabla-fincas");
+    if (tablaFincas) {
+      tablaFincas.innerHTML = (cacheFincas || []).map(f => `
+        <tr><td>${escaparHtml(f.nombre)}</td><td>${escaparHtml(f.ubicacion || "—")}</td><td>${escaparHtml(f.area_hectareas)}</td>
+        <td>${botonesAccion('finca', f.id)}</td></tr>
+      `).join("") || '<tr><td colspan="4" class="vacio">Sin fincas registradas</td></tr>';
+    }
+
+    const tablaLotes = document.getElementById("tabla-lotes");
+    if (tablaLotes) {
+      tablaLotes.innerHTML = (cacheLotesActual || []).map(l => `
+        <tr><td>${escaparHtml(l.nombre)}</td><td>${escaparHtml(l.tipo_cultivo || "—")}</td><td>${escaparHtml(l.area_hectareas)}</td>
+        <td>${botonesAccion('lote', l.id)}</td></tr>
+      `).join("") || '<tr><td colspan="4" class="vacio">Sin lotes registrados</td></tr>';
+    }
+
+    const tablaProveedores = document.getElementById("tabla-proveedores");
+    if (tablaProveedores) {
+      tablaProveedores.innerHTML = (cacheProveedoresActual || []).map(p => `
+        <tr><td>${escaparHtml(p.nombre)}</td><td>${escaparHtml(p.nit || "—")}</td><td>${escaparHtml(p.contacto || "—")}</td><td>${escaparHtml(p.telefono || "—")}</td>
+        <td>${botonesAccion('proveedor', p.id)}</td></tr>
+      `).join("") || '<tr><td colspan="5" class="vacio">Sin proveedores registrados</td></tr>';
+    }
+
+    renderSelectoresFinca();
+  }catch(err){
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }
+}
+window.cargarAdministracion = cargarAdministracion;
+
+function actualizarChipOrganizacion(){
+  const chip = document.getElementById("org-chip-nombre");
+  if (!chip) return;
+  const fincaActiva = (cacheFincas || []).find(f => String(f.id) === String(fincaActivaId));
+  if (fincaActiva) {
+    chip.textContent = fincaActiva.nombre;
+  } else if (cacheFincas && cacheFincas.length) {
+    chip.textContent = "Sin finca activa seleccionada";
+  } else {
+    chip.textContent = "Sin finca registrada";
+  }
+}
+
+/* ==========================================================================
+   L. FINCA ACTIVA
+   ========================================================================== */
+function renderSelectoresFinca(){
+  const fincasActivas = (cacheFincas || []).filter(f => f.activo);
+  // Si la finca activa guardada ya no existe o fue desactivada, se limpia.
+  if (fincaActivaId && !fincasActivas.some(f => String(f.id) === String(fincaActivaId))) {
+    fincaActivaId = "";
+    localStorage.removeItem("agrocontrol_finca_activa");
+  }
+
+  const opciones = '<option value="">Selecciona una finca…</option>' +
+    fincasActivas.map(f => `<option value="${f.id}" ${String(f.id) === String(fincaActivaId) ? "selected" : ""}>${escaparHtml(f.nombre)}</option>`).join("");
+
+  const selectorConfig = document.getElementById("config-finca-activa");
+  if (selectorConfig) selectorConfig.innerHTML = opciones;
+
+  actualizarChipOrganizacion();
+}
+window.renderSelectoresFinca = renderSelectoresFinca;
+
+function cambiarFincaActiva(valor){
+  fincaActivaId = valor || "";
+  if (fincaActivaId) {
+    localStorage.setItem("agrocontrol_finca_activa", fincaActivaId);
+  } else {
+    localStorage.removeItem("agrocontrol_finca_activa");
+  }
+  renderSelectoresFinca();
+  mostrarToast(fincaActivaId ? "Finca activa actualizada" : "Se quitó la finca activa");
+}
+window.cambiarFincaActiva = cambiarFincaActiva;
+
+function validarFincaActivaOAlertar(){
+  if (!cacheFincas || !cacheFincas.filter(f => f.activo).length) {
+    alert("Debes registrar al menos una finca (módulo Administración) antes de crear una bodega.");
+    return false;
+  }
+  if (!fincaActivaId) {
+    alert("Selecciona primero una finca activa en el selector superior antes de crear una bodega.");
+    return false;
+  }
+  return true;
+}
+window.validarFincaActivaOAlertar = validarFincaActivaOAlertar;
+
+function intentarAbrirModalBodega(){
+  if (!validarFincaActivaOAlertar()) return;
+  abrirModal("bodega");
+}
+window.intentarAbrirModalBodega = intentarAbrirModalBodega;
+
+/* ==========================================================================
+   M. MODAL DE CONFIGURACIÓN
+   ========================================================================== */
+function abrirModalConfiguracion(){
+  const cont = document.getElementById("modal-contenido");
+  const temaActual = document.documentElement.getAttribute("data-theme") || "claro";
+  cont.innerHTML = `
+    <h3>Configuración</h3>
+    <div class="config-bloque">
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Modo oscuro</div>
+          <div class="config-fila__sub">Cambia la apariencia de toda la plataforma.</div>
+        </div>
+        <label class="interruptor">
+          <input type="checkbox" id="chk-modo-oscuro" ${temaActual === "oscuro" ? "checked" : ""} onchange="toggleTheme()">
+          <span class="interruptor__riel"></span>
+        </label>
+      </div>
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Finca activa</div>
+          <div class="config-fila__sub">Se usa para validar bodegas nuevas y filtrar reportes.</div>
+        </div>
+        <select id="config-finca-activa" onchange="cambiarFincaActiva(this.value)"></select>
+      </div>
+      <div class="config-fila">
+        <div>
+          <div class="config-fila__titulo">Sesión</div>
+          <div class="config-fila__sub">${escaparHtml((USUARIO && (USUARIO.nombre_completo || USUARIO.nombre_usuario)) || "—")} · ${escaparHtml((USUARIO && USUARIO.rol) || "—")}</div>
+        </div>
+        <button type="button" class="btn-secundario" onclick="cerrarModal(); cerrarSesion();">Cerrar sesión</button>
+      </div>
+    </div>
+    <div class="modal-acciones">
+      <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById("modal-fondo").classList.add("activo");
+  renderSelectoresFinca();
+}
+window.abrirModalConfiguracion = abrirModalConfiguracion;
+
+/* ==========================================================================
+   N. MÓDULO: REPORTES
+   ========================================================================== */
+async function cargarReportes(){
+  try{
+    const [ciclos, fincas] = await Promise.all([
+      apiFetch("/api/produccion/ciclos").catch(() => null),
+      apiFetch("/api/admin/fincas").catch(() => null)
+    ]);
+    if (ciclos) cacheCiclos = ciclos;
+    if (fincas) cacheFincas = fincas;
+
+    const select = document.getElementById("reporte-cosecha-ciclo");
+    if (select) {
+      select.innerHTML = '<option value="">Todos los ciclos</option>' +
+        (cacheCiclos || []).map(c => `<option value="${c.id}">${escaparHtml(c.nombre)} — ${escaparHtml(c.cultivo)}</option>`).join("");
+    }
+
+    const selectorFincaReporte = document.getElementById("reporte-finca");
+    if (selectorFincaReporte) {
+      selectorFincaReporte.innerHTML = '<option value="">Todas las fincas</option>' +
+        (cacheFincas || []).filter(f => f.activo).map(f => `<option value="${f.id}">${escaparHtml(f.nombre)}</option>`).join("");
+      // Por defecto se preselecciona la finca activa, pero el usuario puede
+      // cambiarla libremente sólo para efectos del reporte a descargar.
+      selectorFincaReporte.value = fincaActivaId || "";
+    }
+
+    renderSelectoresFinca();
+  }catch(err){
+    if (err.message === "ERR_NETWORK_DISCONNECTED") notificarDesconexionApiOnce();
+    else mostrarToast(err.message, true);
+  }
+}
+window.cargarReportes = cargarReportes;
+
+async function descargarReporte(ruta, nombreArchivo){
+  try{
+    mostrarToast("Generando reporte...");
+    const resp = await fetch(API_BASE + ruta, {headers:{"Authorization":"Bearer " + TOKEN}});
+    if (!resp.ok) throw new Error("No se pudo generar el reporte");
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    window.URL.revokeObjectURL(url);
+    mostrarToast("Reporte descargado correctamente");
+  }catch(err){ mostrarToast(err.message, true); }
+}
+window.descargarReporte = descargarReporte;
+
+function obtenerFincaSeleccionadaReporte(){
+  const el = document.getElementById("reporte-finca");
+  return el ? el.value : "";
+}
+
+function descargarReporteInventario(formato){
+  const fincaId = obtenerFincaSeleccionadaReporte();
+  const params = new URLSearchParams();
+  if (fincaId) params.set("finca_id", fincaId);
+  const query = params.toString() ? "?" + params.toString() : "";
+  descargarReporte(`/api/reportes/inventario/${formato}${query}`, `inventario.${formato === "excel" ? "xlsx" : "pdf"}`);
+}
+window.descargarReporteInventario = descargarReporteInventario;
+
+function descargarReporteKardex(formato){
+  const desde = document.getElementById("reporte-kardex-desde").value;
+  const hasta = document.getElementById("reporte-kardex-hasta").value;
+  const fincaId = obtenerFincaSeleccionadaReporte();
+  const params = new URLSearchParams();
+  if (desde) params.set("desde", desde);
+  if (hasta) params.set("hasta", hasta);
+  if (fincaId) params.set("finca_id", fincaId);
+  const query = params.toString() ? "?" + params.toString() : "";
+  descargarReporte(`/api/reportes/kardex/${formato}${query}`, `kardex.${formato === "excel" ? "xlsx" : "pdf"}`);
+}
+window.descargarReporteKardex = descargarReporteKardex;
+
+function descargarReporteCosechas(formato){
+  const cicloId = document.getElementById("reporte-cosecha-ciclo").value;
+  const fincaId = obtenerFincaSeleccionadaReporte();
+  const params = new URLSearchParams();
+  if (cicloId) params.set("ciclo_id", cicloId);
+  if (fincaId) params.set("finca_id", fincaId);
+  const query = params.toString() ? "?" + params.toString() : "";
+  descargarReporte(`/api/reportes/cosechas/${formato}${query}`, `cosechas.${formato === "excel" ? "xlsx" : "pdf"}`);
+}
+window.descargarReporteCosechas = descargarReporteCosechas;
+
+/* ==========================================================================
+   Ñ. MÓDULO: MANUAL DE USUARIO
+   ========================================================================== */
+function temaActualApp(){
+  return document.documentElement.getAttribute("data-theme") || "claro";
+}
+
+// Se carga la primera vez que entras a la sección.
+function cargarManual(){
+  const marco = document.getElementById("iframe-manual");
+  if (!marco) return;
+  if (!marco.getAttribute("src")){
+    marco.setAttribute("src", "/manual.html?tema=" + encodeURIComponent(temaActualApp()));
+  }
+}
+window.cargarManual = cargarManual;
+
+// Si cambias el modo claro/oscuro con el manual ya abierto, se recarga con el tema nuevo.
+function sincronizarTemaManual(){
+  const marco = document.getElementById("iframe-manual");
+  if (!marco || !marco.getAttribute("src")) return;
+  marco.setAttribute("src", "/manual.html?tema=" + encodeURIComponent(temaActualApp()));
+}
+
+/* ==========================================================================
+   O. MODALES GENÉRICOS (CREAR / EDITAR REGISTROS)
+   ========================================================================== */
+const formulariosModal = {
+  bodega: {
+    titulo:"Nueva bodega", endpoint:"/api/inventario/bodegas", recargar: cargarInventario,
+    camposEdicion:["nombre", "ubicacion", "finca_id"],
+    campos:[{id:"nombre", label:"Nombre", tipo:"text", requerido:true},
+            {id:"ubicacion", label:"Ubicación", tipo:"text"},
+            {id:"finca_id", label:"Finca", tipo:"select", requerido:true,
+              obtenerOpciones: () => (cacheFincas || []).filter(f => f.activo).map(f => ({ valor: f.id, etiqueta: f.nombre })),
+              obtenerValorInicial: () => fincaActivaId || ''}]
+  },
+  producto: {
+    titulo:"Nuevo producto", endpoint:"/api/inventario/productos", recargar: cargarInventario,
+    camposEdicion:["nombre", "categoria", "unidad_medida", "stock_minimo", "precio_unitario", "proveedor_id"],
+    campos:[{id:"codigo", label:"Código", tipo:"text", requerido:true},
+            {id:"nombre", label:"Nombre", tipo:"text", requerido:true},
+            {id:"categoria", label:"Categoría", tipo:"text"},
+            {id:"unidad_medida", label:"Unidad de medida", tipo:"text", valor:"unidad"},
+            {id:"stock_minimo", label:"Stock mínimo", tipo:"number", valor:0, min:0},
+            {id:"stock_actual", label:"Stock inicial", tipo:"number", valor:0, min:0},
+            {id:"precio_unitario", label:"Precio unitario", tipo:"number", valor:0, min:0}]
+  },
+  finca: {
+    titulo:"Nueva finca", endpoint:"/api/admin/fincas", recargar: cargarAdministracion,
+    camposEdicion:["nombre", "ubicacion", "area_hectareas", "responsable"],
+    campos:[{id:"nombre", label:"Nombre", tipo:"text", requerido:true},
+            {id:"ubicacion", label:"Ubicación", tipo:"text"},
+            {id:"area_hectareas", label:"Área (ha)", tipo:"number", valor:0, min:0},
+            {id:"responsable", label:"Responsable", tipo:"text"}]
+  },
+  lote: {
+    titulo:"Nuevo lote", endpoint:"/api/admin/lotes", recargar: cargarAdministracion,
+    camposEdicion:["nombre", "area_hectareas", "tipo_cultivo"],
+    campos:[{id:"finca_id", label:"Finca", tipo:"select", requerido:true, obtenerOpciones: () => (cacheFincas || []).map(f => ({ valor: f.id, etiqueta: f.nombre }))},
+            {id:"nombre", label:"Nombre", tipo:"text", requerido:true},
+            {id:"area_hectareas", label:"Área (ha)", tipo:"number", valor:0, min:0},
+            {id:"tipo_cultivo", label:"Tipo de cultivo", tipo:"text"}]
+  },
+  proveedor: {
+    titulo:"Nuevo proveedor", endpoint:"/api/admin/proveedores", recargar: cargarAdministracion,
+    camposEdicion:["nombre", "nit", "contacto", "telefono", "correo"],
+    campos:[{id:"nombre", label:"Nombre", tipo:"text", requerido:true},
+            {id:"nit", label:"NIT", tipo:"text"},
+            {id:"contacto", label:"Persona de contacto", tipo:"text"},
+            {id:"telefono", label:"Teléfono", tipo:"text"},
+            {id:"correo", label:"Correo", tipo:"text"}]
+  },
+  ciclo: {
+    titulo:"Nuevo ciclo productivo", endpoint:"/api/produccion/ciclos", recargar: cargarProduccion,
+    campos:[{id:"lote_id", label:"Lote", tipo:"select", requerido:true, obtenerOpciones: () => (cacheLotesActual || []).map(l => ({ valor: l.id, etiqueta: l.nombre }))},
+            {id:"nombre", label:"Nombre del ciclo", tipo:"text", requerido:true},
+            {id:"cultivo", label:"Cultivo", tipo:"text", requerido:true},
+            {id:"fecha_inicio", label:"Fecha de inicio", tipo:"date", requerido:true},
+            {id:"fecha_estimada_cosecha", label:"Fecha estimada de cosecha", tipo:"date"},
+            {id:"rendimiento_esperado_kg", label:"Rendimiento esperado (kg)", tipo:"number", valor:0, min:0}]
+  },
+  potrero: {
+    titulo:"Nuevo potrero", endpoint:"/api/admin/potreros", recargar: cargarPotreros,
+    camposEdicion:["lote_id", "nombre", "capacidad_animales", "tipo_pasto"],
+    campos:[{id:"lote_id", label:"Lote", tipo:"select", requerido:true, obtenerOpciones: () => (cacheLotesActual || []).map(l => ({ valor: l.id, etiqueta: l.nombre }))},
+            {id:"nombre", label:"Nombre del potrero", tipo:"text", requerido:true},
+            {id:"capacidad_animales", label:"Capacidad de animales", tipo:"number", valor:0, min:0},
+            {id:"tipo_pasto", label:"Tipo de pasto", tipo:"select", obtenerOpciones: () => (cachePastos || []).filter(p=>p.activo).map(p => ({ valor: p.nombre, etiqueta: p.nombre }))}]
+  },
+  animal: {
+    titulo:"Registrar animal", endpoint:"/api/admin/animales", recargar: cargarPotreros,
+    campos:[{id:"arete", label:"Código / ARETE", tipo:"text", requerido:true},
+            {id:"peso_kg", label:"Peso (kg)", tipo:"number", requerido:true, min:0},
+            {id:"estado_salud", label:"Estado de salud", tipo:"text", valor:"saludable", requerido:true},
+            {id:"potrero_id", label:"Potrero", tipo:"select", requerido:true, obtenerOpciones: () => (cachePotreros || []).map(p => ({ valor: p.id, etiqueta: p.nombre }))}]
+  },
+  gasto: {
+    titulo:"Registrar gasto", endpoint:"/api/gastos", recargar: cargarDashboard,
+    camposEdicion:["categoria", "descripcion", "monto", "fecha", "finca_id"],
+    campos:[{id:"categoria", label:"Categoría", tipo:"select", requerido:true,
+              opciones:[{valor:"insumos", etiqueta:"Insumos"}, {valor:"mano_de_obra", etiqueta:"Mano de obra"},
+                        {valor:"maquinaria", etiqueta:"Maquinaria"}, {valor:"otros", etiqueta:"Otros"}]},
+            {id:"descripcion", label:"Descripción", tipo:"text", requerido:true},
+            {id:"monto", label:"Monto ($)", tipo:"number", requerido:true, min:0},
+            {id:"fecha", label:"Fecha", tipo:"date", requerido:true,
+              obtenerValorInicial: () => new Date().toLocaleDateString("en-CA")},
+            {id:"finca_id", label:"Finca", tipo:"select",
+              obtenerOpciones: () => (cacheFincas || []).filter(f => f.activo).map(f => ({ valor: f.id, etiqueta: f.nombre })),
+              obtenerValorInicial: () => fincaActivaId || ""}]
+  },
+  pasto: {
+    titulo:"Nuevo tipo de pasto", endpoint:"/api/admin/pastos", recargar: cargarPotreros,
+    camposEdicion:["nombre", "descripcion"],
+    campos:[{id:"nombre", label:"Nombre del pasto", tipo:"text", requerido:true},
+            {id:"descripcion", label:"Descripción", tipo:"text"}]
+  }
+};
+
+function abrirModal(tipo, registro=null){
+  const conf = formulariosModal[tipo];
+  const cont = document.getElementById("modal-contenido");
+  const tituloEditar = "Editar " + conf.titulo.replace(/^Nuev[oa]\s+/i, "").replace(/^Registrar\s+/i, "");
+  cont.innerHTML = `
+    <h3>${registro ? tituloEditar : conf.titulo}</h3>
+    <form id="form-modal" autocomplete="off">
+      ${conf.campos.map(c => {
+        const noEditableAlEditar = registro && conf.camposEdicion && !conf.camposEdicion.includes(c.id) && c.id !== "codigo";
+        const valorPorDefecto = c.obtenerValorInicial ? c.obtenerValorInicial() : c.valor;
+        const valorActual = registro?.[c.id] ?? valorPorDefecto ?? '';
+
+        if (c.tipo === "select") {
+          const opciones = c.obtenerOpciones ? c.obtenerOpciones() : (c.opciones || []);
+          const tieneOpciones = opciones && opciones.length > 0;
+          if (tieneOpciones) {
+            return `
+              <div class="campo">
+                <label>${c.label}</label>
+                <select id="campo-${c.id}" ${c.requerido ? "required" : ""} ${noEditableAlEditar ? "disabled" : ""}>
+                  <option value="">-- Seleccionar ${c.label.toLowerCase()} --</option>
+                  ${opciones.map(o => `<option value="${escaparHtml(o.valor)}" ${String(o.valor) === String(valorActual) ? "selected" : ""}>${escaparHtml(o.etiqueta)}</option>`).join("")}
+                </select>
+              </div>
+            `;
+          }
+          return `
+            <div class="campo">
+              <label>${c.label} (ID)</label>
+              <input type="number" id="campo-${c.id}" ${c.requerido ? "required" : ""} min="1" step="1" value="${escaparHtml(valorActual || 1)}" />
+            </div>
+          `;
+        }
+
+        return `
+        <div class="campo">
+          <label>${c.label}</label>
+          <input type="${c.tipo}" id="campo-${c.id}" ${c.requerido ? "required" : ""}
+            autocomplete="off" name="campo-${c.id}-${Math.random().toString(36).slice(2,7)}"
+            ${c.min !== undefined ? `min="${c.min}"` : ""}
+            ${c.tipo === "number" ? 'step="0.01"' : ""}
+            ${(registro && c.id === "codigo") || noEditableAlEditar ? "readonly" : ""}
+            value="${escaparHtml(valorActual)}" />
+        </div>
+      `;}).join("")}
+      <div class="modal-acciones">
+        <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn-primario" id="modal-submit">Guardar</button>
+      </div>
+    </form>
+  `;
+  document.getElementById("modal-fondo").classList.add("activo");
+
+  document.getElementById("form-modal").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const botonGuardar = document.getElementById("modal-submit");
+    cambiarEstadoCarga(botonGuardar, true, registro ? "Guardando..." : "Creando...");
+    const payload = {};
+    conf.campos.forEach(c=>{
+      const el = document.getElementById("campo-" + c.id);
+      let valor = el.value;
+      if (c.tipo === "number" || c.id.endsWith("_id")) valor = valor === "" ? null : Number(valor);
+      if (valor === "") valor = null;
+      payload[c.id] = valor;
+    });
+    try{
+      const camposPermitidos = registro ? (conf.camposEdicion || conf.campos.map(c => c.id)) : null;
+      const datos = registro ? Object.fromEntries(Object.entries(payload).filter(([campo]) => camposPermitidos.includes(campo))) : payload;
+      const endpoint = registro ? `${conf.endpoint}/${registro.id}` : conf.endpoint;
+      await apiFetch(endpoint, {method: registro ? "PUT" : "POST", body: JSON.stringify(datos)});
+      const mensaje = registro ? "Cambios guardados correctamente" : "Registro guardado correctamente";
+      mostrarToast(mensaje);
+      cerrarModal();
+      conf.recargar();
+    }catch(err){
+      const msgError = err.message === "ERR_NETWORK_DISCONNECTED"
+        ? "No se pudo conectar con el servidor. Verifica tu conexión."
+        : (err.message || "Error al guardar el registro");
+      mostrarToast(msgError, true);
+    }
+    finally{ cambiarEstadoCarga(botonGuardar, false, "Guardar"); }
+  });
+}
+window.abrirModal = abrirModal;
+
+function cerrarModal(){
+  document.getElementById("modal-fondo").classList.remove("activo");
+}
+
+/* ==========================================================================
+   P. ARRANQUE: procesa el regreso de Google y decide si entra a la app
+   ========================================================================== */
+async function procesarRegresoDeGoogle() {
+  const fragmento = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const tokenRecibido = fragmento.get("access_token");
+  if (!tokenRecibido) return false;
+
+  // Limpiamos el token de la URL de inmediato (no debe quedar en el historial).
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+
+  TOKEN = tokenRecibido;
+  try {
+    const usuario = await apiFetch("/api/auth/me");
+    USUARIO = usuario;
+    localStorage.setItem("agrocontrol_token", TOKEN);
+    localStorage.setItem("agrocontrol_usuario", JSON.stringify(USUARIO));
+    mostrarToast("Bienvenido, " + (USUARIO.nombre_completo || USUARIO.correo));
+    return true;
+  } catch (err) {
+    TOKEN = null;
+    localStorage.removeItem("agrocontrol_token");
+    localStorage.removeItem("agrocontrol_usuario");
+    const errorBox = document.getElementById("error-login");
+    if (errorBox) {
+      errorBox.textContent = "No se pudo completar el inicio de sesión con Google.";
+      errorBox.style.display = "block";
+    }
+    return false;
+  }
+}
+
+function mostrarErrorDeGoogleSiExiste() {
+  const params = new URLSearchParams(window.location.search);
+  const mensajeError = params.get("auth_error");
+  if (!mensajeError) return;
+  history.replaceState(null, "", window.location.pathname);
+  const errorBox = document.getElementById("error-login");
+  if (errorBox) {
+    errorBox.textContent = "No se pudo iniciar sesión con Google. Inténtalo de nuevo.";
+    errorBox.style.display = "block";
+  }
+}
+
+(async function arrancarSesion() {
+  const autenticadoPorGoogle = await procesarRegresoDeGoogle();
+  if (autenticadoPorGoogle) {
+    iniciarApp();
+    return;
+  }
+  mostrarErrorDeGoogleSiExiste();
+  if (TOKEN && USUARIO) iniciarApp();
+})();
+</script>
+
+</body>
+</html>

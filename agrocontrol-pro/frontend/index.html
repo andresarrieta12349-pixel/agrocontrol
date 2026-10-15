@@ -73,6 +73,12 @@
             </button>
           </div>
 
+          <form id="form-login-correo" class="form-login-dark" style="margin-top:14px;">
+            <div style="text-align:center;opacity:.7;font-size:13px;margin:4px 0 10px;">o con tu correo</div>
+            <div class="campo"><input id="login-correo" class="campo-input-dark" type="email" placeholder="Correo electrónico" autocomplete="email" required /></div>
+            <div class="campo"><input id="login-password" class="campo-input-dark" type="password" placeholder="Contraseña" autocomplete="current-password" required /></div>
+            <button type="submit" class="btn-continuar-blanco">Iniciar sesión</button>
+          </form>
           <div class="error-login" id="error-login"></div>
           <button type="button" class="enlace-registro" id="mostrar-registro">¿No tienes cuenta? Regístrate</button>
         </div>
@@ -546,6 +552,12 @@
 <script>
   window.AGROCONTROL_API_BASE = "https://agrocontrol-production-dfd3.up.railway.app";
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-api.js"></script>
 <script src="/js/theme.js"></script>
 <script src="/js/views/inventory-view.js"></script>
 <script src="/js/views/potreros-view.js"></script>
@@ -626,7 +638,7 @@ function mostrarToast(mensaje, esError=false){
   setTimeout(()=> t.style.display = "none", 3500);
 }
 
-async function apiFetch(path, opciones={}){
+async function apiFetchViejo(path, opciones={}){
   const headers = Object.assign({"Content-Type":"application/json"}, opciones.headers || {});
   if (TOKEN) headers["Authorization"] = "Bearer " + TOKEN;
   try {
@@ -742,7 +754,7 @@ configurarValidacionAutenticacion();
    Google. Al terminar, Google redirige de regreso aquí con el token de
    AgroControl Pro en el fragmento de la URL (después de "#"). */
 document.getElementById("btn-google-login")?.addEventListener("click", () => {
-  window.location.href = API_BASE + "/api/auth/google/login";
+  window.loginConGoogle();
 });
 
 document.getElementById("btn-cerrar-modal-login")?.addEventListener("click", () => {
@@ -818,6 +830,7 @@ document.getElementById("form-registro").addEventListener("submit", async (e)=>{
 
 /* --- D4. Cerrar sesión --- */
 function cerrarSesion(){
+  if (window.supabaseClient) window.supabaseClient.auth.signOut();
   TOKEN = null; USUARIO = null;
   localStorage.removeItem("agrocontrol_token");
   localStorage.removeItem("agrocontrol_usuario");
@@ -1799,7 +1812,7 @@ async function cargarReportes(){
 }
 window.cargarReportes = cargarReportes;
 
-async function descargarReporte(ruta, nombreArchivo){
+async function descargarReporteViejo(ruta, nombreArchivo){
   try{
     mostrarToast("Generando reporte...");
     const resp = await fetch(API_BASE + ruta, {headers:{"Authorization":"Bearer " + TOKEN}});
